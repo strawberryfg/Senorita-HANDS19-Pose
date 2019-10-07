@@ -1,0 +1,33 @@
+net: "train_aug_lfd_proj_single_ld_patchref.prototxt"
+
+# The base learning rate, momentum and the weight decay of the network.
+#type: "Adam"
+type: "RMSProp"
+base_lr: 0.0000002
+#0.0001 after 14000
+
+
+#7719 -> wd = 0.00001 -> 17029 -> 0.00002 manual loss h36m only depth: 2d = 0.5 : 1 
+#to 18972 -> 0.0001 Ada 
+#momentum: 0.9
+#momentum2: 0.999
+# The learning rate policy
+lr_policy: "fixed"
+
+
+#clip_gradients: 1.0
+#weight_decay: 0.00001
+gamma: 0.2
+# Display every 200 iterations
+display: 1
+
+# The maximum number of iterations
+max_iter: 490000
+
+# snapshot intermediate results
+snapshot: 1000
+snapshot_prefix: "res3dhmauglfdprojsingleldpatchref"
+
+# solver mode: CPU or GPU
+solver_mode: GPU
+

@@ -1,0 +1,6737 @@
+#-----Generate random image index for training 
+
+layer {
+  name: "h5"
+  type: "HDF5Data"
+  top: "image_index"
+  top: "bbx"
+  top: "gt_joint_3d_global"
+  
+  include {
+    phase: TRAIN
+  }
+  hdf5_data_param {
+    source: "../train10fold.txt"
+    batch_size: 6
+  }
+}
+
+layer {
+  name: "h5"
+  type: "HDF5Data"
+  top: "image_index"
+  top: "bbx"
+  top: "gt_joint_3d_global"
+  
+  include {
+    phase: TEST
+  }
+  hdf5_data_param {
+    source: "../val.txt"
+    batch_size: 6
+  }
+}
+
+
+
+
+#-----Slice to bbx_x1 bbx_y1 bbx_x2 bbx_y2
+layer {
+  name: "slice_bbx"
+  type: "Slice"
+  bottom: "bbx"
+  top: "bbx_x1"
+  top: "bbx_y1"
+  top: "bbx_x2"
+  top: "bbx_y2"
+  slice_param {
+     axis: 1
+	 slice_point: 1
+	 slice_point: 2
+	 slice_point: 3
+  }  
+}
+
+
+layer {
+  bottom: "bbx_x1"
+  bottom: "bbx_x1"
+  bottom: "bbx_x2"
+  top: "mmcp_u_add"
+  name: "mmcp_u_add"
+  type: "Eltwise"
+}
+
+layer {
+  bottom: "mmcp_u_add"
+  top: "mmcp_u"
+  name: "mmcp_u"
+  type: "ScaleVector"
+  scale_vector_param {
+    scale_factor: 0.5
+  }
+}
+
+layer {
+  bottom: "bbx_y1"
+  bottom: "bbx_y2"
+  top: "mmcp_v_add"
+  name: "mmcp_v_add"
+  type: "Eltwise"
+}
+
+layer {
+  bottom: "mmcp_v_add"
+  top: "mmcp_v"
+  name: "mmcp_v"
+  type: "ScaleVector"
+  scale_vector_param {
+    scale_factor: 0.5
+  }
+}
+
+#----- Read mmcp
+#layer {
+#  name: "read_mmcp"
+#  type: "ReadBlobFromFileIndexing"
+#  bottom: "image_index"
+#  top: "mmcp"
+#  read_blob_from_file_indexing_param {
+#     file_prefix: "../../training/mmcp/"
+#	 num_to_read: 2
+#  }
+#}
+
+#-----Slice to mmcp.u mmcp.v
+#layer {
+#  name: "slice_mmcp"
+#  type: "Slice"
+#  bottom: "mmcp"
+#  top: "mmcp_u"
+#  top: "mmcp_v"
+#  slice_param { 
+#     axis: 1
+#	 slice_point: 1
+#  }  
+#}
+
+
+
+
+layer {
+  type: "DeepHandModelGetHands19ChaDepth"
+  bottom: "bbx_x1"
+  bottom: "bbx_y1"
+  bottom: "bbx_x2"
+  bottom: "bbx_y2"
+  bottom: "mmcp_u"
+  bottom: "mmcp_v"
+  bottom: "image_index"
+  top: "depth"
+  top: "ext_bbx_x1"
+  top: "ext_bbx_y1"
+  top: "ext_bbx_x2"
+  top: "ext_bbx_y2"
+  top: "avgX"
+  top: "avgY"
+  top: "avgZ"
+  top: "avgU"
+  top: "avgV"
+  transform_param {
+     crop_size: 256
+  }
+  read_blob_from_file_indexing_param {
+     file_prefix: "../../"
+  }
+  deep_hand_model_hands19_param {
+     img_prefix: "training_images/image_D"
+	 o_add_depth: false
+	 depth_threshold: 100
+  }
+  include {
+     phase: TRAIN
+  }
+}
+
+
+
+layer {
+  type: "DeepHandModelGetHands19ChaDepth"
+  bottom: "bbx_x1"
+  bottom: "bbx_y1"
+  bottom: "bbx_x2"
+  bottom: "bbx_y2"
+  bottom: "mmcp_u"
+  bottom: "mmcp_v"
+  bottom: "image_index"
+  top: "depth"
+  top: "ext_bbx_x1"
+  top: "ext_bbx_y1"
+  top: "ext_bbx_x2"
+  top: "ext_bbx_y2"
+  top: "avgX"
+  top: "avgY"
+  top: "avgZ"
+  top: "avgU"
+  top: "avgV"
+  transform_param {
+     crop_size: 256
+  }
+  read_blob_from_file_indexing_param {
+     file_prefix: "../../"
+  }
+  deep_hand_model_hands19_param {
+     img_prefix: "training_images/image_D"
+	 o_add_depth: false
+  }
+  include {
+     phase: TEST
+  }
+}
+
+
+
+
+
+
+
+
+
+#----- Get min_x  
+layer {
+  name: "min_x"
+  type: "AddVectorByConstant"
+  bottom: "avgX"
+  top: "min_x"
+  add_vector_by_constant_param {
+     add_value: -100.0
+  }
+}
+
+
+
+#----- Get max_x
+layer {
+  name: "max_x"
+  type: "AddVectorByConstant"
+  bottom: "avgX"
+  top: "max_x"
+  add_vector_by_constant_param {
+     add_value: 100.0
+  }
+}
+
+
+#----- Get min_y
+layer {
+  name: "min_y"
+  type: "AddVectorByConstant"
+  bottom: "avgY"
+  top: "min_y"
+  add_vector_by_constant_param {
+     add_value: -100.0
+  }
+}
+
+
+
+#----- Get max_y
+layer {
+  name: "max_y"
+  type: "AddVectorByConstant"
+  bottom: "avgY"
+  top: "max_y"
+  add_vector_by_constant_param {
+     add_value: 100.0
+  }
+}
+
+
+
+#----- Get min_z
+layer {
+  name: "min_z"
+  type: "AddVectorByConstant"
+  bottom: "avgZ"
+  top: "min_z"
+  add_vector_by_constant_param {
+     add_value: -100.0
+  }
+}
+
+
+
+#----- Get max_z
+layer {
+  name: "max_z"
+  type: "AddVectorByConstant"
+  bottom: "avgZ"
+  top: "max_z"
+  add_vector_by_constant_param {
+     add_value: 100.0
+  }
+}
+
+
+
+
+
+#----- project to global 2d 
+layer {
+  name: "gt_joint_2d_global"
+  top: "gt_joint_2d_global"
+  bottom: "gt_joint_3d_global"
+  type: "DeepHandModelPinholeCameraOrigin"
+}
+
+
+
+layer {
+  bottom: "depth"
+  bottom: "depth"
+  top: "depthnothing"
+  name: "depthnothing"
+  loss_weight: 0.0
+  type: "EuclideanLoss"
+}
+
+
+
+
+
+
+layer {
+   type: "DeepHandModelReadDepthNoBBXWithAVGZAug"
+   bottom: "image_index"
+   bottom: "avgZ"
+   bottom: "ext_bbx_x1"
+   bottom: "ext_bbx_y1"
+   bottom: "ext_bbx_x2"
+   bottom: "ext_bbx_y2"
+   bottom: "min_x"
+   bottom: "max_x"
+   bottom: "min_y"
+   bottom: "max_y"
+   bottom: "min_z"
+   bottom: "max_z"
+   bottom: "gt_joint_3d_global"
+   bottom: "gt_joint_2d_global"
+   top: "aug_depth_img"
+   top: "aug_joint_3d_local"
+   top: "pt_cl"
+   top: "depth_voxel"
+   
+   name: "lfd"
+   read_depth_no_bbx_with_avgz_param {
+      file_prefix: "../../training_images_crop/"
+	 depth_size: 256	 
+  }
+   transform_param {
+      is_divide: true 
+	  minus_pixel_value: 0.0
+	  
+	  max_rotate_degree: 30.0
+	  crop_size_x: 256
+      crop_size_y: 256
+	  scale_prob: 0.5
+	  scale_min: 0.75
+	  scale_max: 1.25
+	  target_dist: 1.25
+      center_perterb_max: 5.0
+	  
+	  
+   }
+   deep_hand_model_hands19_param {
+     real_n_synth: false
+	 o_pt_cl: true
+	 o_layered_depth: false
+	 o_depth_voxel: true 
+  }
+  gen_3d_skeleton_map_param {
+     depth_dims: 32
+	 map_size: 256
+  }
+  
+   include {
+      phase: TRAIN
+   }
+}
+
+
+layer {
+   type: "DeepHandModelReadDepthNoBBXWithAVGZAug"
+   bottom: "image_index"
+   bottom: "avgZ"
+   bottom: "ext_bbx_x1"
+   bottom: "ext_bbx_y1"
+   bottom: "ext_bbx_x2"
+   bottom: "ext_bbx_y2"
+   bottom: "min_x"
+   bottom: "max_x"
+   bottom: "min_y"
+   bottom: "max_y"
+   bottom: "min_z"
+   bottom: "max_z"
+   bottom: "gt_joint_3d_global"
+   bottom: "gt_joint_2d_global"
+   top: "aug_depth_img"
+   top: "aug_joint_3d_local"
+   top: "pt_cl"
+   top: "depth_voxel"
+   name: "lfd"
+   read_depth_no_bbx_with_avgz_param {
+      file_prefix: "../../training_images_crop/"
+	 depth_size: 256	 
+  }
+   transform_param {
+      is_divide: true 
+	  minus_pixel_value: 0
+	  
+	  max_rotate_degree: 0.0
+	  crop_size_x: 256
+      crop_size_y: 256
+	  scale_prob: -1.0
+	  scale_min: 0.75
+	  scale_max: 1.25
+	  target_dist: 1.25
+      center_perterb_max: 0.0
+   }
+    deep_hand_model_hands19_param {
+     real_n_synth: false
+	 o_pt_cl: true
+	 o_layered_depth: false
+	 o_depth_voxel: true 
+  }
+  gen_3d_skeleton_map_param {
+     depth_dims: 32
+	 map_size: 256
+  }
+  
+   include {
+      phase: TEST
+   }
+}
+
+layer {
+   type: "DeepHandModelCubiodIntoGlobalV2"
+   bottom: "aug_joint_3d_local"
+   bottom: "min_x"
+   bottom: "max_x"
+   bottom: "min_y"
+   bottom: "max_y"
+   bottom: "min_z"
+   bottom: "max_z"
+   top: "aug_joint_3d_global"
+   name: "aug_joint_3d_global"
+}
+
+
+
+#----- project to global 2d 
+layer {
+  name: "aug_joint_2d_global"
+  top: "aug_joint_2d_global"
+  bottom: "aug_joint_3d_global"
+  type: "DeepHandModelPinholeCameraOrigin"
+}
+
+#layer {
+#   type: "DeepHandModelAug"
+#   bottom: "image_index"
+#   bottom: "ext_bbx_x1"
+#   bottom: "ext_bbx_y1"
+#   bottom: "ext_bbx_x2"
+#   bottom: "ext_bbx_y2"
+#   bottom: "gt_joint_2d_global"
+#   bottom: "add_depth"
+#   top: "aug_depth_img"
+#   top: "aug_2d_global"
+#   transform_param {
+#    
+#    max_rotate_degree: 30.0
+#    crop_size_x: 256
+#    crop_size_y: 256
+#    scale_prob: 1.0
+#    target_dist: 1.0
+#    center_perterb_max: 0.0
+#    scale_min: 0.75
+#	scale_max: 1.25
+#    num_parts: 21
+#    minus_pixel_value: 128.0
+#    color_scale_factor: 0.0
+#    use_integral_aug: true
+#    is_divide: true
+	
+#  }
+#  read_depth_no_bbx_with_avgz_param {
+#    file_prefix: "../../training_640x480_crop_gray/"
+#	l_fr_d: true
+#  }
+#  include {
+#     phase: TRAIN
+#  }
+#}
+
+
+
+#layer {
+#   type: "DeepHandModelAug"
+#   bottom: "image_index"
+#   bottom: "ext_bbx_x1"
+#   bottom: "ext_bbx_y1"
+#   bottom: "ext_bbx_x2"
+#   bottom: "ext_bbx_y2"
+#   bottom: "gt_joint_2d_global"
+#   bottom: "add_depth"
+#   top: "aug_depth_img"
+#   top: "aug_2d_global"
+#   transform_param {
+#    
+#    max_rotate_degree: 0.0
+#    crop_size_x: 256
+#    crop_size_y: 256
+#    scale_prob: -1.0
+#    target_dist: 1.0
+#    center_perterb_max: 0.0
+#    
+#    num_parts: 21
+#    minus_pixel_value: 128.0
+#    color_scale_factor: 0.0
+#    use_integral_aug: true
+#    is_divide: true
+#  }
+#  read_depth_no_bbx_with_avgz_param {
+#    file_prefix: "../../test_640x480_crop_gray/"#
+#	l_fr_d: true
+#  }
+#  include {
+#     phase: TEST
+#  }
+#}
+
+
+
+layer {
+  bottom: "aug_depth_img"
+  bottom: "aug_depth_img"
+  top: "aug_depth_img_nothing"
+  name: "aug_depth_img_nothing"
+  loss_weight: 0.0
+  type: "EuclideanLoss"
+}
+
+
+
+
+#======to get [0, 256] cropped gt 2d -> cropped gt 2d in range [0, 1]
+#layer {
+# type: "ScaleVector"
+# bottom: "aug_2d_global"
+# top: "aug_joint_2d_local"
+# name: "aug_joint_2d_local"
+# scale_vector_param {
+#    scale_factor: 0.00390625
+# }
+#}
+
+
+#----- project within bbx 
+layer {
+  name: "aug_joint_2d_local"
+  top: "aug_joint_2d_local"
+  bottom: "aug_joint_2d_global"
+  bottom: "ext_bbx_x1"
+  bottom: "ext_bbx_y1"
+  bottom: "ext_bbx_x2"
+  bottom: "ext_bbx_y2"
+  type: "DeepHandModelProjectionGlobal2Local"
+}
+
+
+
+#----- project within bbx 
+#layer {
+#  name: "gt_joint_2d_local"
+#  top: "gt_joint_2d_local"
+#  bottom: "gt_joint_2d_global"
+#  bottom: "ext_bbx_x1"
+#  bottom: "ext_bbx_y1"
+#  bottom: "ext_bbx_x2"
+#  bottom: "ext_bbx_y2"
+#  type: "DeepHandModelProjectionGlobal2Local"
+#}
+
+
+#------Get the local 3d
+layer {
+  name: "gt_joint_3d_local"
+  type: "DeepHandModelNormalize3DIntoCubiodV2"
+  bottom: "gt_joint_3d_global"
+  bottom: "min_x"
+  bottom: "max_x"
+  bottom: "min_y"
+  bottom: "max_y"
+  bottom: "min_z"
+  bottom: "max_z"
+  top: "gt_joint_3d_local"
+}
+
+
+
+
+
+
+#-----slice 
+layer {
+  name: "slice_gt_joint_3d_local"
+  bottom: "gt_joint_3d_local"
+  top: "loc_xy_0"
+  top: "loc_z_0"  
+  top: "loc_xy_1"
+  top: "loc_z_1"
+  top: "loc_xy_2"
+  top: "loc_z_2"
+  top: "loc_xy_3"
+  top: "loc_z_3"
+  top: "loc_xy_4"
+  top: "loc_z_4"
+  top: "loc_xy_5"
+  top: "loc_z_5"
+  top: "loc_xy_6"
+  top: "loc_z_6"
+  top: "loc_xy_7"
+  top: "loc_z_7"
+  top: "loc_xy_8"
+  top: "loc_z_8"
+  top: "loc_xy_9"
+  top: "loc_z_9"
+  top: "loc_xy_10"
+  top: "loc_z_10"
+  top: "loc_xy_11"
+  top: "loc_z_11"
+  top: "loc_xy_12"
+  top: "loc_z_12"
+  top: "loc_xy_13"
+  top: "loc_z_13"
+  top: "loc_xy_14"
+  top: "loc_z_14"
+  top: "loc_xy_15"
+  top: "loc_z_15"
+  top: "loc_xy_16"
+  top: "loc_z_16"
+  top: "loc_xy_17"
+  top: "loc_z_17"
+  top: "loc_xy_18"
+  top: "loc_z_18"
+  top: "loc_xy_19"
+  top: "loc_z_19"
+  top: "loc_xy_20"
+  top: "loc_z_20"
+  type: "Slice"
+  slice_param {
+     axis: 1   
+  slice_point: 2
+  slice_point: 3
+  slice_point: 5
+  slice_point: 6
+  slice_point: 8
+  slice_point: 9
+  slice_point: 11
+  slice_point: 12
+  slice_point: 14
+  slice_point: 15
+  slice_point: 17
+  slice_point: 18
+  slice_point: 20
+  slice_point: 21
+  slice_point: 23
+  slice_point: 24
+  slice_point: 26
+  slice_point: 27
+  slice_point: 29
+  slice_point: 30
+  slice_point: 32
+  slice_point: 33
+  slice_point: 35
+  slice_point: 36
+  slice_point: 38
+  slice_point: 39
+  slice_point: 41
+  slice_point: 42
+  slice_point: 44
+  slice_point: 45
+  slice_point: 47
+  slice_point: 48
+  slice_point: 50
+  slice_point: 51
+  slice_point: 53
+  slice_point: 54
+  slice_point: 56
+  slice_point: 57
+  slice_point: 59
+  slice_point: 60
+  slice_point: 62
+  }
+}
+
+layer {
+  bottom: "loc_z_0"
+  bottom: "loc_z_1"
+  bottom: "loc_z_2"
+  bottom: "loc_z_3"
+  bottom: "loc_z_4"
+  bottom: "loc_z_5"
+  bottom: "loc_z_6"
+  bottom: "loc_z_7"
+  bottom: "loc_z_8"
+  bottom: "loc_z_9"
+  bottom: "loc_z_10"
+  bottom: "loc_z_11"
+  bottom: "loc_z_12"
+  bottom: "loc_z_13"
+  bottom: "loc_z_14"
+  bottom: "loc_z_15"
+  bottom: "loc_z_16"
+  bottom: "loc_z_17"
+  bottom: "loc_z_18"
+  bottom: "loc_z_19"
+  bottom: "loc_z_20"
+  top: "gt_depth"
+  name: "gt_depth"
+  type: "Concat"                                  
+}
+
+
+#layer {
+#  type: "DeepHandModelProjectionLocal2Global3D"
+#  bottom: "aug_joint_2d_local"
+#  bottom: "gt_depth"
+#  bottom: "ext_bbx_x1"
+#  bottom: "ext_bbx_y1"
+#  bottom: "min_z"
+#  bottom: "ext_bbx_x2"
+#  bottom: "ext_bbx_y2"
+#  bottom: "max_z"
+#  top: "aug_joint_3d_global"
+#}
+
+
+
+#------Get the aug local 3d 
+#layer {
+#  name: "aug_joint_3d_local"
+#  type: "DeepHandModelNormalize3DIntoCubiodV2"
+#  bottom: "aug_joint_3d_global"
+#  bottom: "min_x"
+#  bottom: "max_x"
+#  bottom: "min_y"
+#  bottom: "max_y"
+#  bottom: "min_z"
+#  bottom: "max_z"
+#  top: "aug_joint_3d_local"
+#}
+
+
+
+
+
+
+
+#============generate 3d heatmap groud truth 
+#layer {
+#  type: "Gen3DHeatmapInMoreDetailV3"
+#  bottom: "aug_joint_3d_local"
+#  bottom: "aug_joint_2d_local"
+#  top: "label"
+#  name: "hm_3d"
+#  gen_3d_heatmap_in_more_detail_v3_param {
+#     x_lower_bound: 0.0
+#	 x_upper_bound: 1.0
+#	 y_lower_bound: 0.0
+#	 y_upper_bound: 1.0
+#	 z_lower_bound: -1.0
+#	 z_upper_bound: 1.0
+#	 depth_dims: 64
+#	 map_size: 64
+#	 joint_num: 21
+#  }
+#}
+
+#layer {
+#   bottom: "label"
+#   bottom: "label"
+#   top: "labelnothing"
+#   name: "labelnothing"
+#   type: "EuclideanLoss"
+#   loss_weight: 0.0
+#}
+
+
+
+
+layer {
+   type: "DeepHandModelProjectDepth"
+   bottom: "pt_cl"
+   bottom: "min_x"
+   bottom: "max_x"
+   bottom: "min_y"
+   bottom: "max_y"
+   bottom: "min_z"
+   bottom: "max_z"
+   bottom: "avgX"
+   bottom: "avgY"
+   bottom: "avgZ"
+   top: "proj_xy"
+   top: "proj_zy"
+   top: "proj_zx"
+   name: "proj_depth" 
+   read_depth_no_bbx_with_avgz_param {
+     depth_size: 256
+   }
+   transform_param {
+     is_divide: true 
+	 minus_pixel_value: 0.0
+   }
+}
+
+#===concat raw depth XY, ZY, ZX plane projection
+layer {
+   type: "Concat"
+   bottom: "aug_depth_img"
+   bottom: "proj_xy"
+   bottom: "proj_zy"
+   bottom: "proj_zx"
+   bottom: "depth_voxel"
+   top: "system_input"
+   name: "system_input"
+}
+
+
+
+
+
+
+
+
+layer {
+  name: "conv1_new"
+  type: "CuDNNConvolution"
+  bottom: "aug_depth_img"
+  top: "conv_blob1"
+  convolution_param {
+    num_output: 64
+    bias_term: false
+    pad: 3
+    kernel_size: 7
+    group: 1
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+	
+
+    dilation: 1
+    engine: DEFAULT  
+  }
+}
+layer {
+  name: "batch_norm1"
+  type: "BatchNorm"
+  bottom: "conv_blob1"
+  top: "batch_norm_blob1"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale1"
+  type: "Scale"
+  bottom: "batch_norm_blob1"
+  top: "batch_norm_blob1"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu1"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob1"
+  top: "relu_blob1"
+  
+}
+layer {
+  name: "max_pool1"
+  type: "CuDNNPooling"
+  bottom: "relu_blob1"
+  top: "max_pool_blob1"
+  pooling_param {
+    engine: DEFAULT
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+    #pad: 1
+	
+  }
+}
+
+
+
+layer {
+  name: "conv1_new_single"
+  type: "CuDNNConvolution"
+  bottom: "system_input"
+  top: "conv_blob1_single"
+  convolution_param {
+    num_output: 64
+    bias_term: false
+    pad: 3
+    kernel_size: 7
+    group: 1
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+	
+
+    dilation: 1
+    engine: DEFAULT  
+  }
+}
+
+
+layer {
+  name: "batch_norm1_single"
+  type: "BatchNorm"
+  bottom: "conv_blob1_single"
+  top: "batch_norm_blob1_single"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale1_single"
+  type: "Scale"
+  bottom: "batch_norm_blob1_single"
+  top: "batch_norm_blob1_single"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu1_single"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob1_single"
+  top: "relu_blob1_single"
+  
+}
+layer {
+  name: "max_pool1_single"
+  type: "CuDNNPooling"
+  bottom: "relu_blob1_single"
+  top: "max_pool_blob1_single"
+  pooling_param {
+    engine: DEFAULT
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+    #pad: 1
+	
+  }
+}
+
+layer {
+  type: "Concat"
+  bottom: "max_pool_blob1_single"
+  bottom: "max_pool_blob1"
+  name: "max_pool1_blob1_concat"
+  top: "max_pool1_blob1_concat"
+}
+
+
+
+
+layer {
+  name: "conv2_single"
+  type: "CuDNNConvolution"
+  bottom: "max_pool1_blob1_concat"
+  top: "conv_blob2"
+  convolution_param {
+    num_output: 64
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm2"
+  type: "BatchNorm"
+  bottom: "conv_blob2"
+  top: "batch_norm_blob2"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale2"
+  type: "Scale"
+  bottom: "batch_norm_blob2"
+  top: "batch_norm_blob2"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu2"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob2"
+  top: "relu_blob2"
+    
+}
+layer {
+  name: "conv3"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob2"
+  top: "conv_blob3"
+  convolution_param {
+    num_output: 64
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm3"
+  type: "BatchNorm"
+  bottom: "conv_blob3"
+  top: "batch_norm_blob3"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale3"
+  type: "Scale"
+  bottom: "batch_norm_blob3"
+  top: "batch_norm_blob3"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu3"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob3"
+  top: "relu_blob3"
+    
+}
+layer {
+  name: "conv4"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob3"
+  top: "conv_blob4"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm4"
+  type: "BatchNorm"
+  bottom: "conv_blob4"
+  top: "batch_norm_blob4"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale4"
+  type: "Scale"
+  bottom: "batch_norm_blob4"
+  top: "batch_norm_blob4"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "conv5"
+  type: "CuDNNConvolution"
+  bottom: "max_pool_blob1"
+  top: "conv_blob5"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm5"
+  type: "BatchNorm"
+  bottom: "conv_blob5"
+  top: "batch_norm_blob5"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale5"
+  type: "Scale"
+  bottom: "batch_norm_blob5"
+  top: "batch_norm_blob5"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add1"
+  type: "Eltwise"
+  bottom: "batch_norm_blob4"
+  bottom: "batch_norm_blob5"
+  top: "add_blob1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu4"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob1"
+  top: "relu_blob4"
+    
+}
+layer {
+  name: "conv6"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob4"
+  top: "conv_blob6"
+  convolution_param {
+    num_output: 64
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm6"
+  type: "BatchNorm"
+  bottom: "conv_blob6"
+  top: "batch_norm_blob6"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale6"
+  type: "Scale"
+  bottom: "batch_norm_blob6"
+  top: "batch_norm_blob6"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu5"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob6"
+  top: "relu_blob5"
+    
+}
+layer {
+  name: "conv7"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob5"
+  top: "conv_blob7"
+  convolution_param {
+    num_output: 64
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm7"
+  type: "BatchNorm"
+  bottom: "conv_blob7"
+  top: "batch_norm_blob7"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale7"
+  type: "Scale"
+  bottom: "batch_norm_blob7"
+  top: "batch_norm_blob7"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu6"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob7"
+  top: "relu_blob6"
+    
+}
+layer {
+  name: "conv8"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob6"
+  top: "conv_blob8"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm8"
+  type: "BatchNorm"
+  bottom: "conv_blob8"
+  top: "batch_norm_blob8"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale8"
+  type: "Scale"
+  bottom: "batch_norm_blob8"
+  top: "batch_norm_blob8"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add2"
+  type: "Eltwise"
+  bottom: "batch_norm_blob8"
+  bottom: "relu_blob4"
+  top: "add_blob2"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu7"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+
+  bottom: "add_blob2"
+  top: "relu_blob7"
+    
+}
+layer {
+  name: "conv9"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob7"
+  top: "conv_blob9"
+  convolution_param {
+    num_output: 64
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm9"
+  type: "BatchNorm"
+  bottom: "conv_blob9"
+  top: "batch_norm_blob9"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale9"
+  type: "Scale"
+  bottom: "batch_norm_blob9"
+  top: "batch_norm_blob9"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu8"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob9"
+  top: "relu_blob8"
+    
+}
+layer {
+  name: "conv10"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob8"
+  top: "conv_blob10"
+  convolution_param {
+    num_output: 64
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm10"
+  type: "BatchNorm"
+  bottom: "conv_blob10"
+  top: "batch_norm_blob10"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale10"
+  type: "Scale"
+  bottom: "batch_norm_blob10"
+  top: "batch_norm_blob10"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu9"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob10"
+  top: "relu_blob9"
+    
+}
+layer {
+  name: "conv11"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob9"
+  top: "conv_blob11"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm11"
+  type: "BatchNorm"
+  bottom: "conv_blob11"
+  top: "batch_norm_blob11"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale11"
+  type: "Scale"
+  bottom: "batch_norm_blob11"
+  top: "batch_norm_blob11"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add3"
+  type: "Eltwise"
+  bottom: "batch_norm_blob11"
+  bottom: "relu_blob7"
+  top: "add_blob3"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu10"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob3"
+  top: "relu_blob10"
+    
+}
+layer {
+  name: "conv12"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob10"
+  top: "conv_blob12"
+  convolution_param {
+    num_output: 128
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm12"
+  type: "BatchNorm"
+  bottom: "conv_blob12"
+  top: "batch_norm_blob12"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale12"
+  type: "Scale"
+  bottom: "batch_norm_blob12"
+  top: "batch_norm_blob12"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu11"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob12"
+  top: "relu_blob11"
+    
+}
+layer {
+  name: "conv13"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob11"
+  top: "conv_blob13"
+  convolution_param {
+    num_output: 128
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm13"
+  type: "BatchNorm"
+  bottom: "conv_blob13"
+  top: "batch_norm_blob13"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale13"
+  type: "Scale"
+  bottom: "batch_norm_blob13"
+  top: "batch_norm_blob13"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu12"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob13"
+  top: "relu_blob12"
+    
+}
+layer {
+  name: "conv14"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob12"
+  top: "conv_blob14"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm14"
+  type: "BatchNorm"
+  bottom: "conv_blob14"
+  top: "batch_norm_blob14"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale14"
+  type: "Scale"
+  bottom: "batch_norm_blob14"
+  top: "batch_norm_blob14"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "conv15"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob10"
+  top: "conv_blob15"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm15"
+  type: "BatchNorm"
+  bottom: "conv_blob15"
+  top: "batch_norm_blob15"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale15"
+  type: "Scale"
+  bottom: "batch_norm_blob15"
+  top: "batch_norm_blob15"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add4"
+  type: "Eltwise"
+  bottom: "batch_norm_blob14"
+  bottom: "batch_norm_blob15"
+  top: "add_blob4"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu13"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob4"
+  top: "relu_blob13"
+    
+}
+layer {
+  name: "conv16"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob13"
+  top: "conv_blob16"
+  convolution_param {
+    num_output: 128
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm16"
+  type: "BatchNorm"
+  bottom: "conv_blob16"
+  top: "batch_norm_blob16"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale16"
+  type: "Scale"
+  bottom: "batch_norm_blob16"
+  top: "batch_norm_blob16"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu14"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob16"
+  top: "relu_blob14"
+    
+}
+layer {
+  name: "conv17"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob14"
+  top: "conv_blob17"
+  convolution_param {
+    num_output: 128
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm17"
+  type: "BatchNorm"
+  bottom: "conv_blob17"
+  top: "batch_norm_blob17"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+	
+  }
+}
+layer {
+  name: "bn_scale17"
+  type: "Scale"
+  bottom: "batch_norm_blob17"
+  top: "batch_norm_blob17"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu15"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob17"
+  top: "relu_blob15"
+    
+}
+layer {
+  name: "conv18"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob15"
+  top: "conv_blob18"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT	
+  }
+}
+layer {
+  name: "batch_norm18"
+  type: "BatchNorm"
+  bottom: "conv_blob18"
+  top: "batch_norm_blob18"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale18"
+  type: "Scale"
+  bottom: "batch_norm_blob18"
+  top: "batch_norm_blob18"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add5"
+  type: "Eltwise"
+  bottom: "batch_norm_blob18"
+  bottom: "relu_blob13"
+  top: "add_blob5"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu16"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob5"
+  top: "relu_blob16"
+}
+layer {
+  name: "conv19"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob16"
+  top: "conv_blob19"
+  convolution_param {
+    num_output: 128
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm19"
+  type: "BatchNorm"
+  bottom: "conv_blob19"
+  top: "batch_norm_blob19"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale19"
+  type: "Scale"
+  bottom: "batch_norm_blob19"
+  top: "batch_norm_blob19"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu17"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob19"
+  top: "relu_blob17"
+}
+layer {
+  name: "conv20"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob17"
+  top: "conv_blob20"
+  convolution_param {
+    num_output: 128
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm20"
+  type: "BatchNorm"
+  bottom: "conv_blob20"
+  top: "batch_norm_blob20"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale20"
+  type: "Scale"
+  bottom: "batch_norm_blob20"
+  top: "batch_norm_blob20"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu18"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob20"
+  top: "relu_blob18"
+}
+layer {
+  name: "conv21"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob18"
+  top: "conv_blob21"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm21"
+  type: "BatchNorm"
+  bottom: "conv_blob21"
+  top: "batch_norm_blob21"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale21"
+  type: "Scale"
+  bottom: "batch_norm_blob21"
+  top: "batch_norm_blob21"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add6"
+  type: "Eltwise"
+  bottom: "batch_norm_blob21"
+  bottom: "relu_blob16"
+  top: "add_blob6"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu19"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob6"
+  top: "relu_blob19"
+}
+layer {
+  name: "conv22"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob19"
+  top: "conv_blob22"
+  convolution_param {
+    num_output: 128
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm22"
+  type: "BatchNorm"
+  bottom: "conv_blob22"
+  top: "batch_norm_blob22"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale22"
+  type: "Scale"
+  bottom: "batch_norm_blob22"
+  top: "batch_norm_blob22"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu20"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob22"
+  top: "relu_blob20"
+}
+layer {
+  name: "conv23"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob20"
+  top: "conv_blob23"
+  convolution_param {
+    num_output: 128
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm23"
+  type: "BatchNorm"
+  bottom: "conv_blob23"
+  top: "batch_norm_blob23"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale23"
+  type: "Scale"
+  bottom: "batch_norm_blob23"
+  top: "batch_norm_blob23"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu21"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob23"
+  top: "relu_blob21"
+}
+layer {
+  name: "conv24"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob21"
+  top: "conv_blob24"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm24"
+  type: "BatchNorm"
+  bottom: "conv_blob24"
+  top: "batch_norm_blob24"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale24"
+  type: "Scale"
+  bottom: "batch_norm_blob24"
+  top: "batch_norm_blob24"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add7"
+  type: "Eltwise"
+  bottom: "batch_norm_blob24"
+  bottom: "relu_blob19"
+  top: "add_blob7"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu22"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob7"
+  top: "relu_blob22"
+}
+layer {
+  name: "conv25"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob22"
+  top: "conv_blob25"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm25"
+  type: "BatchNorm"
+  bottom: "conv_blob25"
+  top: "batch_norm_blob25"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale25"
+  type: "Scale"
+  bottom: "batch_norm_blob25"
+  top: "batch_norm_blob25"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu23"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob25"
+  top: "relu_blob23"
+}
+layer {
+  name: "conv26"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob23"
+  top: "conv_blob26"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm26"
+  type: "BatchNorm"
+  bottom: "conv_blob26"
+  top: "batch_norm_blob26"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale26"
+  type: "Scale"
+  bottom: "batch_norm_blob26"
+  top: "batch_norm_blob26"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu24"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob26"
+  top: "relu_blob24"
+}
+layer {
+  name: "conv27"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob24"
+  top: "conv_blob27"
+  convolution_param {
+    num_output: 1024
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm27"
+  type: "BatchNorm"
+  bottom: "conv_blob27"
+  top: "batch_norm_blob27"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale27"
+  type: "Scale"
+  bottom: "batch_norm_blob27"
+  top: "batch_norm_blob27"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "conv28"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob22"
+  top: "conv_blob28"
+  convolution_param {
+    num_output: 1024
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm28"
+  type: "BatchNorm"
+  bottom: "conv_blob28"
+  top: "batch_norm_blob28"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale28"
+  type: "Scale"
+  bottom: "batch_norm_blob28"
+  top: "batch_norm_blob28"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add8"
+  type: "Eltwise"
+  bottom: "batch_norm_blob27"
+  bottom: "batch_norm_blob28"
+  top: "add_blob8"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu25"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob8"
+  top: "relu_blob25"
+}
+layer {
+  name: "conv29"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob25"
+  top: "conv_blob29"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm29"
+  type: "BatchNorm"
+  bottom: "conv_blob29"
+  top: "batch_norm_blob29"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale29"
+  type: "Scale"
+  bottom: "batch_norm_blob29"
+  top: "batch_norm_blob29"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu26"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob29"
+  top: "relu_blob26"
+}
+layer {
+  name: "conv30"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob26"
+  top: "conv_blob30"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm30"
+  type: "BatchNorm"
+  bottom: "conv_blob30"
+  top: "batch_norm_blob30"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale30"
+  type: "Scale"
+  bottom: "batch_norm_blob30"
+  top: "batch_norm_blob30"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu27"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob30"
+  top: "relu_blob27"
+}
+layer {
+  name: "conv31"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob27"
+  top: "conv_blob31"
+  convolution_param {
+    num_output: 1024
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm31"
+  type: "BatchNorm"
+  bottom: "conv_blob31"
+  top: "batch_norm_blob31"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale31"
+  type: "Scale"
+  bottom: "batch_norm_blob31"
+  top: "batch_norm_blob31"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add9"
+  type: "Eltwise"
+  bottom: "batch_norm_blob31"
+  bottom: "relu_blob25"
+  top: "add_blob9"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu28"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob9"
+  top: "relu_blob28"
+}
+layer {
+  name: "conv32"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob28"
+  top: "conv_blob32"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm32"
+  type: "BatchNorm"
+  bottom: "conv_blob32"
+  top: "batch_norm_blob32"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale32"
+  type: "Scale"
+  bottom: "batch_norm_blob32"
+  top: "batch_norm_blob32"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu29"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob32"
+  top: "relu_blob29"
+}
+layer {
+  name: "conv33"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob29"
+  top: "conv_blob33"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm33"
+  type: "BatchNorm"
+  bottom: "conv_blob33"
+  top: "batch_norm_blob33"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale33"
+  type: "Scale"
+  bottom: "batch_norm_blob33"
+  top: "batch_norm_blob33"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu30"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob33"
+  top: "relu_blob30"
+}
+layer {
+  name: "conv34"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob30"
+  top: "conv_blob34"
+  convolution_param {
+    num_output: 1024
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm34"
+  type: "BatchNorm"
+  bottom: "conv_blob34"
+  top: "batch_norm_blob34"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale34"
+  type: "Scale"
+  bottom: "batch_norm_blob34"
+  top: "batch_norm_blob34"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add10"
+  type: "Eltwise"
+  bottom: "batch_norm_blob34"
+  bottom: "relu_blob28"
+  top: "add_blob10"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu31"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob10"
+  top: "relu_blob31"
+}
+layer {
+  name: "conv35"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob31"
+  top: "conv_blob35"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm35"
+  type: "BatchNorm"
+  bottom: "conv_blob35"
+  top: "batch_norm_blob35"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale35"
+  type: "Scale"
+  bottom: "batch_norm_blob35"
+  top: "batch_norm_blob35"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu32"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob35"
+  top: "relu_blob32"
+}
+layer {
+  name: "conv36"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob32"
+  top: "conv_blob36"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm36"
+  type: "BatchNorm"
+  bottom: "conv_blob36"
+  top: "batch_norm_blob36"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale36"
+  type: "Scale"
+  bottom: "batch_norm_blob36"
+  top: "batch_norm_blob36"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu33"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob36"
+  top: "relu_blob33"
+}
+layer {
+  name: "conv37"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob33"
+  top: "conv_blob37"
+  convolution_param {
+    num_output: 1024
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm37"
+  type: "BatchNorm"
+  bottom: "conv_blob37"
+  top: "batch_norm_blob37"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale37"
+  type: "Scale"
+  bottom: "batch_norm_blob37"
+  top: "batch_norm_blob37"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add11"
+  type: "Eltwise"
+  bottom: "batch_norm_blob37"
+  bottom: "relu_blob31"
+  top: "add_blob11"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu34"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob11"
+  top: "relu_blob34"
+}
+layer {
+  name: "conv38"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob34"
+  top: "conv_blob38"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm38"
+  type: "BatchNorm"
+  bottom: "conv_blob38"
+  top: "batch_norm_blob38"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale38"
+  type: "Scale"
+  bottom: "batch_norm_blob38"
+  top: "batch_norm_blob38"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu35"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob38"
+  top: "relu_blob35"
+}
+layer {
+  name: "conv39"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob35"
+  top: "conv_blob39"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm39"
+  type: "BatchNorm"
+  bottom: "conv_blob39"
+  top: "batch_norm_blob39"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale39"
+  type: "Scale"
+  bottom: "batch_norm_blob39"
+  top: "batch_norm_blob39"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu36"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob39"
+  top: "relu_blob36"
+}
+layer {
+  name: "conv40"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob36"
+  top: "conv_blob40"
+  convolution_param {
+    num_output: 1024
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm40"
+  type: "BatchNorm"
+  bottom: "conv_blob40"
+  top: "batch_norm_blob40"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale40"
+  type: "Scale"
+  bottom: "batch_norm_blob40"
+  top: "batch_norm_blob40"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add12"
+  type: "Eltwise"
+  bottom: "batch_norm_blob40"
+  bottom: "relu_blob34"
+  top: "add_blob12"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu37"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob12"
+  top: "relu_blob37"
+}
+layer {
+  name: "conv41"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob37"
+  top: "conv_blob41"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm41"
+  type: "BatchNorm"
+  bottom: "conv_blob41"
+  top: "batch_norm_blob41"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale41"
+  type: "Scale"
+  bottom: "batch_norm_blob41"
+  top: "batch_norm_blob41"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu38"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob41"
+  top: "relu_blob38"
+}
+layer {
+  name: "conv42"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob38"
+  top: "conv_blob42"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm42"
+  type: "BatchNorm"
+  bottom: "conv_blob42"
+  top: "batch_norm_blob42"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale42"
+  type: "Scale"
+  bottom: "batch_norm_blob42"
+  top: "batch_norm_blob42"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu39"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob42"
+  top: "relu_blob39"
+}
+layer {
+  name: "conv43"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob39"
+  top: "conv_blob43"
+  convolution_param {
+    num_output: 1024
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm43"
+  type: "BatchNorm"
+  bottom: "conv_blob43"
+  top: "batch_norm_blob43"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale43"
+  type: "Scale"
+  bottom: "batch_norm_blob43"
+  top: "batch_norm_blob43"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add13"
+  type: "Eltwise"
+  bottom: "batch_norm_blob43"
+  bottom: "relu_blob37"
+  top: "add_blob13"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu40"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob13"
+  top: "relu_blob40"
+}
+layer {
+  name: "conv44"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob40"
+  top: "conv_blob44"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm44"
+  type: "BatchNorm"
+  bottom: "conv_blob44"
+  top: "batch_norm_blob44"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale44"
+  type: "Scale"
+  bottom: "batch_norm_blob44"
+  top: "batch_norm_blob44"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu41"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob44"
+  top: "relu_blob41"
+}
+layer {
+  name: "conv45"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob41"
+  top: "conv_blob45"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm45"
+  type: "BatchNorm"
+  bottom: "conv_blob45"
+  top: "batch_norm_blob45"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale45"
+  type: "Scale"
+  bottom: "batch_norm_blob45"
+  top: "batch_norm_blob45"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu42"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob45"
+  top: "relu_blob42"
+}
+layer {
+  name: "conv46"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob42"
+  top: "conv_blob46"
+  convolution_param {
+    num_output: 2048
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm46"
+  type: "BatchNorm"
+  bottom: "conv_blob46"
+  top: "batch_norm_blob46"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale46"
+  type: "Scale"
+  bottom: "batch_norm_blob46"
+  top: "batch_norm_blob46"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "conv47"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob40"
+  top: "conv_blob47"
+  convolution_param {
+    num_output: 2048
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm47"
+  type: "BatchNorm"
+  bottom: "conv_blob47"
+  top: "batch_norm_blob47"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale47"
+  type: "Scale"
+  bottom: "batch_norm_blob47"
+  top: "batch_norm_blob47"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add14"
+  type: "Eltwise"
+  bottom: "batch_norm_blob46"
+  bottom: "batch_norm_blob47"
+  top: "add_blob14"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu43"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob14"
+  top: "relu_blob43"
+}
+layer {
+  name: "conv48"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob43"
+  top: "conv_blob48"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm48"
+  type: "BatchNorm"
+  bottom: "conv_blob48"
+  top: "batch_norm_blob48"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale48"
+  type: "Scale"
+  bottom: "batch_norm_blob48"
+  top: "batch_norm_blob48"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu44"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob48"
+  top: "relu_blob44"
+}
+layer {
+  name: "conv49"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob44"
+  top: "conv_blob49"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm49"
+  type: "BatchNorm"
+  bottom: "conv_blob49"
+  top: "batch_norm_blob49"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale49"
+  type: "Scale"
+  bottom: "batch_norm_blob49"
+  top: "batch_norm_blob49"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu45"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob49"
+  top: "relu_blob45"
+}
+layer {
+  name: "conv50"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob45"
+  top: "conv_blob50"
+  convolution_param {
+    num_output: 2048
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm50"
+  type: "BatchNorm"
+  bottom: "conv_blob50"
+  top: "batch_norm_blob50"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale50"
+  type: "Scale"
+  bottom: "batch_norm_blob50"
+  top: "batch_norm_blob50"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add15"
+  type: "Eltwise"
+  bottom: "batch_norm_blob50"
+  bottom: "relu_blob43"
+  top: "add_blob15"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu46"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob15"
+  top: "relu_blob46"
+}
+layer {
+  name: "conv51"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob46"
+  top: "conv_blob51"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm51"
+  type: "BatchNorm"
+  bottom: "conv_blob51"
+  top: "batch_norm_blob51"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale51"
+  type: "Scale"
+  bottom: "batch_norm_blob51"
+  top: "batch_norm_blob51"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu47"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob51"
+  top: "relu_blob47"
+}
+layer {
+  name: "conv52"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob47"
+  top: "conv_blob52"
+  convolution_param {
+    num_output: 512
+    bias_term: false
+    pad: 1
+    kernel_size: 3
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm52"
+  type: "BatchNorm"
+  bottom: "conv_blob52"
+  top: "batch_norm_blob52"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale52"
+  type: "Scale"
+  bottom: "batch_norm_blob52"
+  top: "batch_norm_blob52"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu48"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob52"
+  top: "relu_blob48"
+}
+layer {
+  name: "conv53"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob48"
+  top: "conv_blob53"
+  convolution_param {
+    num_output: 2048
+    bias_term: false
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm53"
+  type: "BatchNorm"
+  bottom: "conv_blob53"
+  top: "batch_norm_blob53"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale53"
+  type: "Scale"
+  bottom: "batch_norm_blob53"
+  top: "batch_norm_blob53"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "add16"
+  type: "Eltwise"
+  bottom: "batch_norm_blob53"
+  bottom: "relu_blob46"
+  top: "add_blob16"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "relu49"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "add_blob16"
+  top: "relu_blob49"
+}
+layer {
+  name: "conv_transpose1"
+  type: "CuDNNDeconvolution"
+  bottom: "relu_blob49"
+  top: "conv_transpose_blob1"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 1
+    kernel_size: 4
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm54"
+  type: "BatchNorm"
+  bottom: "conv_transpose_blob1"
+  top: "batch_norm_blob54"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale54"
+  type: "Scale"
+  bottom: "batch_norm_blob54"
+  top: "batch_norm_blob54"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu50"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob54"
+  top: "relu_blob50"
+}
+layer {
+  name: "conv_transpose2"
+  type: "CuDNNDeconvolution"
+  bottom: "relu_blob50"
+  top: "conv_transpose_blob2"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 1
+    kernel_size: 4
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm55"
+  type: "BatchNorm"
+  bottom: "conv_transpose_blob2"
+  top: "batch_norm_blob55"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale55"
+  type: "Scale"
+  bottom: "batch_norm_blob55"
+  top: "batch_norm_blob55"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu51"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob55"
+  top: "relu_blob51"
+}
+layer {
+  name: "conv_transpose3"
+  type: "CuDNNDeconvolution"
+  bottom: "relu_blob51"
+  top: "conv_transpose_blob3"
+  convolution_param {
+    num_output: 256
+    bias_term: false
+    pad: 1
+    kernel_size: 4
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+layer {
+  name: "batch_norm56"
+  type: "BatchNorm"
+  bottom: "conv_transpose_blob3"
+  top: "batch_norm_blob56"
+  batch_norm_param {
+    use_global_stats: false   
+    eps: 1e-05
+    engine: DEFAULT
+  }
+}
+layer {
+  name: "bn_scale56"
+  type: "Scale"
+  bottom: "batch_norm_blob56"
+  top: "batch_norm_blob56"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu52"
+   type: "CuDNNReLU"
+  relu_param {
+    engine: DEFAULT
+  }
+  bottom: "batch_norm_blob56"
+  top: "relu_blob52"
+}
+layer {
+  name: "conv54_new"
+  type: "CuDNNConvolution"
+  bottom: "relu_blob52"
+  top: "heatmap"
+  convolution_param {
+    num_output: 1344
+    bias_term: true
+    pad: 0
+    kernel_size: 1
+    group: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+
+    dilation: 1
+    engine: DEFAULT  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#=====flat 3d cube -> scale vector -> reshape
+layer {
+  #bottom: "label"
+  bottom: "heatmap"
+  top: "heatmap_flat"
+  type: "Flatten"
+  name: "heatmap_flat"
+}
+
+#====
+layer {
+  type: "ScaleVector"
+  bottom: "heatmap_flat"
+  top: "heatmap_flat"
+  name: "heatmap_flat"
+  scale_vector_param {
+    scale_factor: 1.0
+  }
+}
+
+layer {
+  type: "Reshape"
+  bottom: "heatmap_flat"
+  top: "heatmap_flat_reshape"
+  name: "heatmap_flat_reshape"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 1344
+       dim: 64
+       dim: 64
+    }
+  }
+}
+
+
+
+
+#-----slice cube 21 joints
+layer {
+  name: "slice_cube"
+  bottom: "heatmap_flat_reshape"
+  top: "rs_cube_0"
+  top: "rs_cube_1"
+  top: "rs_cube_2"
+  top: "rs_cube_3"
+  top: "rs_cube_4"
+  top: "rs_cube_5"
+  top: "rs_cube_6"
+  top: "rs_cube_7"
+  top: "rs_cube_8"
+  top: "rs_cube_9"
+  top: "rs_cube_10"
+  top: "rs_cube_11"
+  top: "rs_cube_12"
+  top: "rs_cube_13"
+  top: "rs_cube_14"
+  top: "rs_cube_15"
+  top: "rs_cube_16"
+  top: "rs_cube_17"
+  top: "rs_cube_18"
+  top: "rs_cube_19"
+  top: "rs_cube_20"
+  type: "Slice"
+  slice_param {
+     axis: 1   
+   slice_point: 64
+  slice_point: 128
+  slice_point: 192
+  slice_point: 256
+  slice_point: 320
+  slice_point: 384
+  slice_point: 448
+  slice_point: 512
+  slice_point: 576
+  slice_point: 640
+  slice_point: 704
+  slice_point: 768
+  slice_point: 832
+  slice_point: 896
+  slice_point: 960
+  slice_point: 1024
+  slice_point: 1088
+  slice_point: 1152
+  slice_point: 1216
+  slice_point: 1280
+  }
+}
+
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_0"
+  top: "rs_cube_0_rs"
+  name: "rs_cube_0_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_0_rs"
+  top: "rs_cube_0_rs_sm"
+  name: "rs_cube_0_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_0_rs_sm"
+  top: "pred_cube_0"
+  name: "pred_cube_0"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_1"
+  top: "rs_cube_1_rs"
+  name: "rs_cube_1_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_1_rs"
+  top: "rs_cube_1_rs_sm"
+  name: "rs_cube_1_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_1_rs_sm"
+  top: "pred_cube_1"
+  name: "pred_cube_1"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_2"
+  top: "rs_cube_2_rs"
+  name: "rs_cube_2_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_2_rs"
+  top: "rs_cube_2_rs_sm"
+  name: "rs_cube_2_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_2_rs_sm"
+  top: "pred_cube_2"
+  name: "pred_cube_2"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_3"
+  top: "rs_cube_3_rs"
+  name: "rs_cube_3_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_3_rs"
+  top: "rs_cube_3_rs_sm"
+  name: "rs_cube_3_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_3_rs_sm"
+  top: "pred_cube_3"
+  name: "pred_cube_3"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_4"
+  top: "rs_cube_4_rs"
+  name: "rs_cube_4_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  
+  bottom: "rs_cube_4_rs"
+  top: "rs_cube_4_rs_sm"
+  name: "rs_cube_4_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_4_rs_sm"
+  top: "pred_cube_4"
+  name: "pred_cube_4"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_5"
+  top: "rs_cube_5_rs"
+  name: "rs_cube_5_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_5_rs"
+  top: "rs_cube_5_rs_sm"
+  name: "rs_cube_5_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_5_rs_sm"
+  top: "pred_cube_5"
+  name: "pred_cube_5"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_6"
+  top: "rs_cube_6_rs"
+  name: "rs_cube_6_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_6_rs"
+  top: "rs_cube_6_rs_sm"
+  name: "rs_cube_6_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_6_rs_sm"
+  top: "pred_cube_6"
+  name: "pred_cube_6"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_7"
+  top: "rs_cube_7_rs"
+  name: "rs_cube_7_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_7_rs"
+  top: "rs_cube_7_rs_sm"
+  name: "rs_cube_7_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_7_rs_sm"
+  top: "pred_cube_7"
+  name: "pred_cube_7"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_8"
+  top: "rs_cube_8_rs"
+  name: "rs_cube_8_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_8_rs"
+  top: "rs_cube_8_rs_sm"
+  name: "rs_cube_8_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_8_rs_sm"
+  top: "pred_cube_8"
+  name: "pred_cube_8"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_9"
+  top: "rs_cube_9_rs"
+  name: "rs_cube_9_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_9_rs"
+  top: "rs_cube_9_rs_sm"
+  name: "rs_cube_9_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_9_rs_sm"
+  top: "pred_cube_9"
+  name: "pred_cube_9"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_10"
+  top: "rs_cube_10_rs"
+  name: "rs_cube_10_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_10_rs"
+  top: "rs_cube_10_rs_sm"
+  name: "rs_cube_10_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_10_rs_sm"
+  top: "pred_cube_10"
+  name: "pred_cube_10"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_11"
+  top: "rs_cube_11_rs"
+  name: "rs_cube_11_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_11_rs"
+  top: "rs_cube_11_rs_sm"
+  name: "rs_cube_11_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_11_rs_sm"
+  top: "pred_cube_11"
+  name: "pred_cube_11"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_12"
+  top: "rs_cube_12_rs"
+  name: "rs_cube_12_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_12_rs"
+  top: "rs_cube_12_rs_sm"
+  name: "rs_cube_12_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_12_rs_sm"
+  top: "pred_cube_12"
+  name: "pred_cube_12"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_13"
+  top: "rs_cube_13_rs"
+  name: "rs_cube_13_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_13_rs"
+  top: "rs_cube_13_rs_sm"
+  name: "rs_cube_13_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_13_rs_sm"
+  top: "pred_cube_13"
+  name: "pred_cube_13"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_14"
+  top: "rs_cube_14_rs"
+  name: "rs_cube_14_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_14_rs"
+  top: "rs_cube_14_rs_sm"
+  name: "rs_cube_14_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_14_rs_sm"
+  top: "pred_cube_14"
+  name: "pred_cube_14"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_15"
+  top: "rs_cube_15_rs"
+  name: "rs_cube_15_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_15_rs"
+  top: "rs_cube_15_rs_sm"
+  name: "rs_cube_15_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_15_rs_sm"
+  top: "pred_cube_15"
+  name: "pred_cube_15"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_16"
+  top: "rs_cube_16_rs"
+  name: "rs_cube_16_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_16_rs"
+  top: "rs_cube_16_rs_sm"
+  name: "rs_cube_16_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_16_rs_sm"
+  top: "pred_cube_16"
+  name: "pred_cube_16"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_17"
+  top: "rs_cube_17_rs"
+  name: "rs_cube_17_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_17_rs"
+  top: "rs_cube_17_rs_sm"
+  name: "rs_cube_17_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_17_rs_sm"
+  top: "pred_cube_17"
+  name: "pred_cube_17"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_18"
+  top: "rs_cube_18_rs"
+  name: "rs_cube_18_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_18_rs"
+  top: "rs_cube_18_rs_sm"
+  name: "rs_cube_18_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_18_rs_sm"
+  top: "pred_cube_18"
+  name: "pred_cube_18"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_19"
+  top: "rs_cube_19_rs"
+  name: "rs_cube_19_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_19_rs"
+  top: "rs_cube_19_rs_sm"
+  name: "rs_cube_19_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_19_rs_sm"
+  top: "pred_cube_19"
+  name: "pred_cube_19"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+
+
+#Bx64x64x64 -> Bx (64x64x64)
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_20"
+  top: "rs_cube_20_rs"
+  name: "rs_cube_20_rs"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 262144
+    }
+  }
+}
+
+#softmax heatmaps = F.softmax(heatmaps, 2)
+layer {
+   type: "CuDNNSoftmax"
+  softmax_param {
+     engine: DEFAULT
+  }
+  bottom: "rs_cube_20_rs"
+  top: "rs_cube_20_rs_sm"
+  name: "rs_cube_20_rs_sm"
+}
+
+layer {
+  type: "Reshape"
+  bottom: "rs_cube_20_rs_sm"
+  top: "pred_cube_20"
+  name: "pred_cube_20"
+  reshape_param {
+    shape {
+       dim: 0
+       dim: 64
+     dim: 64
+     dim: 64
+    }
+  }
+}
+
+
+
+
+
+#----integral x cube_0
+layer {
+  name: "integral_x_cube_0_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_0"
+  top: "pred_cube_0_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_0_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_0_x_vec"
+  top: "pred_cube_0_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_0
+layer {
+  name: "integral_y_cube_0_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_0"
+  top: "pred_cube_0_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_0_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_0_y_vec"
+  top: "pred_cube_0_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_0
+layer {
+  name: "integral_z_cube_0_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_0"
+  top: "pred_cube_0_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_0_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_0_z_vec"
+  top: "pred_cube_0_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+#----integral x cube_1
+layer {
+  name: "integral_x_cube_1_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_1"
+  top: "pred_cube_1_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_1_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_1_x_vec"
+  top: "pred_cube_1_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_1
+layer {
+  name: "integral_y_cube_1_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_1"
+  top: "pred_cube_1_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_1_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_1_y_vec"
+  top: "pred_cube_1_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+#----integral z cube_1
+layer {
+  name: "integral_z_cube_1_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_1"
+  top: "pred_cube_1_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_1_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_1_z_vec"
+  top: "pred_cube_1_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+
+
+
+#----integral x cube_2
+layer {
+  name: "integral_x_cube_2_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_2"
+  top: "pred_cube_2_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_2_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_2_x_vec"
+  top: "pred_cube_2_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_2
+layer {
+  name: "integral_y_cube_2_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_2"
+  top: "pred_cube_2_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_2_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_2_y_vec"
+  top: "pred_cube_2_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_2
+layer {
+  name: "integral_z_cube_2_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_2"
+  top: "pred_cube_2_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_2_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_2_z_vec"
+  top: "pred_cube_2_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+#----integral x cube_3
+layer {
+  name: "integral_x_cube_3_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_3"
+  top: "pred_cube_3_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_3_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_3_x_vec"
+  top: "pred_cube_3_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_3
+layer {
+  name: "integral_y_cube_3_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_3"
+  top: "pred_cube_3_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_3_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_3_y_vec"
+  top: "pred_cube_3_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_3
+layer {
+  name: "integral_z_cube_3_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_3"
+  top: "pred_cube_3_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_3_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_3_z_vec"
+  top: "pred_cube_3_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+#----integral x cube_4
+layer {
+  name: "integral_x_cube_4_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_4"
+  top: "pred_cube_4_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_4_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_4_x_vec"
+  top: "pred_cube_4_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_4
+layer {
+  name: "integral_y_cube_4_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_4"
+  top: "pred_cube_4_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_4_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_4_y_vec"
+  top: "pred_cube_4_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_4
+layer {
+  name: "integral_z_cube_4_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_4"
+  top: "pred_cube_4_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_4_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_4_z_vec"
+  top: "pred_cube_4_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+#----integral x cube_5
+layer {
+  name: "integral_x_cube_5_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_5"
+  top: "pred_cube_5_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_5_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_5_x_vec"
+  top: "pred_cube_5_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_5
+layer {
+  name: "integral_y_cube_5_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_5"
+  top: "pred_cube_5_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_5_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_5_y_vec"
+  top: "pred_cube_5_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_5
+layer {
+  name: "integral_z_cube_5_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_5"
+  top: "pred_cube_5_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_5_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_5_z_vec"
+  top: "pred_cube_5_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+#----integral x cube_6
+layer {
+  name: "integral_x_cube_6_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_6"
+  top: "pred_cube_6_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_6_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_6_x_vec"
+  top: "pred_cube_6_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_6
+layer {
+  name: "integral_y_cube_6_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_6"
+  top: "pred_cube_6_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_6_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_6_y_vec"
+  top: "pred_cube_6_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_6
+layer {
+  name: "integral_z_cube_6_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_6"
+  top: "pred_cube_6_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_6_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_6_z_vec"
+  top: "pred_cube_6_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+
+
+#----integral x cube_7
+layer {
+  name: "integral_x_cube_7_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_7"
+  top: "pred_cube_7_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_7_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_7_x_vec"
+  top: "pred_cube_7_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_7
+layer {
+  name: "integral_y_cube_7_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_7"
+  top: "pred_cube_7_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_7_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_7_y_vec"
+  top: "pred_cube_7_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_7
+layer {
+  name: "integral_z_cube_7_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_7"
+  top: "pred_cube_7_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_7_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_7_z_vec"
+  top: "pred_cube_7_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral x cube_8
+layer {
+  name: "integral_x_cube_8_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_8"
+  top: "pred_cube_8_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_8_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_8_x_vec"
+  top: "pred_cube_8_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_8
+layer {
+  name: "integral_y_cube_8_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_8"
+  top: "pred_cube_8_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_8_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_8_y_vec"
+  top: "pred_cube_8_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_8
+layer {
+  name: "integral_z_cube_8_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_8"
+  top: "pred_cube_8_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_8_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_8_z_vec"
+  top: "pred_cube_8_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+
+#----integral x cube_9
+layer {
+  name: "integral_x_cube_9_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_9"
+  top: "pred_cube_9_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_9_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_9_x_vec"
+  top: "pred_cube_9_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_9
+layer {
+  name: "integral_y_cube_9_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_9"
+  top: "pred_cube_9_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_9_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_9_y_vec"
+  top: "pred_cube_9_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_9
+layer {
+  name: "integral_z_cube_9_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_9"
+  top: "pred_cube_9_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_9_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_9_z_vec"
+  top: "pred_cube_9_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+#----integral x cube_10
+layer {
+  name: "integral_x_cube_10_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_10"
+  top: "pred_cube_10_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_10_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_10_x_vec"
+  top: "pred_cube_10_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_10
+layer {
+  name: "integral_y_cube_10_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_10"
+  top: "pred_cube_10_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_10_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_10_y_vec"
+  top: "pred_cube_10_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_10
+layer {
+  name: "integral_z_cube_10_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_10"
+  top: "pred_cube_10_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_10_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_10_z_vec"
+  top: "pred_cube_10_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+#----integral x cube_11
+layer {
+  name: "integral_x_cube_11_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_11"
+  top: "pred_cube_11_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_11_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_11_x_vec"
+  top: "pred_cube_11_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_11
+layer {
+  name: "integral_y_cube_11_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_11"
+  top: "pred_cube_11_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_11_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_11_y_vec"
+  top: "pred_cube_11_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_11
+layer {
+  name: "integral_z_cube_11_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_11"
+  top: "pred_cube_11_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_11_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_11_z_vec"
+  top: "pred_cube_11_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral x cube_12
+layer {
+  name: "integral_x_cube_12_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_12"
+  top: "pred_cube_12_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_12_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_12_x_vec"
+  top: "pred_cube_12_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_12
+layer {
+  name: "integral_y_cube_12_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_12"
+  top: "pred_cube_12_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_12_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_12_y_vec"
+  top: "pred_cube_12_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_12
+layer {
+  name: "integral_z_cube_12_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_12"
+  top: "pred_cube_12_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_12_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_12_z_vec"
+  top: "pred_cube_12_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+#----integral x cube_13
+layer {
+  name: "integral_x_cube_13_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_13"
+  top: "pred_cube_13_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_13_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_13_x_vec"
+  top: "pred_cube_13_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_13
+layer {
+  name: "integral_y_cube_13_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_13"
+  top: "pred_cube_13_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_13_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_13_y_vec"
+  top: "pred_cube_13_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_13
+layer {
+  name: "integral_z_cube_13_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_13"
+  top: "pred_cube_13_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_13_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_13_z_vec"
+  top: "pred_cube_13_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral x cube_14
+layer {
+  name: "integral_x_cube_14_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_14"
+  top: "pred_cube_14_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_14_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_14_x_vec"
+  top: "pred_cube_14_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_14
+layer {
+  name: "integral_y_cube_14_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_14"
+  top: "pred_cube_14_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_14_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_14_y_vec"
+  top: "pred_cube_14_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_14
+layer {
+  name: "integral_z_cube_14_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_14"
+  top: "pred_cube_14_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_14_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_14_z_vec"
+  top: "pred_cube_14_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+#----integral x cube_15
+layer {
+  name: "integral_x_cube_15_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_15"
+  top: "pred_cube_15_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_15_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_15_x_vec"
+  top: "pred_cube_15_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_15
+layer {
+  name: "integral_y_cube_15_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_15"
+  top: "pred_cube_15_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_15_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_15_y_vec"
+  top: "pred_cube_15_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_15
+layer {
+  name: "integral_z_cube_15_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_15"
+  top: "pred_cube_15_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_15_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_15_z_vec"
+  top: "pred_cube_15_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+
+#----integral x cube_16
+layer {
+  name: "integral_x_cube_16_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_16"
+  top: "pred_cube_16_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_16_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_16_x_vec"
+  top: "pred_cube_16_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_16
+layer {
+  name: "integral_y_cube_16_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_16"
+  top: "pred_cube_16_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_16_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_16_y_vec"
+  top: "pred_cube_16_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_16
+layer {
+  name: "integral_z_cube_16_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_16"
+  top: "pred_cube_16_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_16_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_16_z_vec"
+  top: "pred_cube_16_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+
+
+
+#----integral x cube_17
+layer {
+  name: "integral_x_cube_17_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_17"
+  top: "pred_cube_17_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_17_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_17_x_vec"
+  top: "pred_cube_17_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_17
+layer {
+  name: "integral_y_cube_17_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_17"
+  top: "pred_cube_17_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_17_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_17_y_vec"
+  top: "pred_cube_17_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_17
+layer {
+  name: "integral_z_cube_17_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_17"
+  top: "pred_cube_17_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_17_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_17_z_vec"
+  top: "pred_cube_17_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+
+#----integral x cube_18
+layer {
+  name: "integral_x_cube_18_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_18"
+  top: "pred_cube_18_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_18_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_18_x_vec"
+  top: "pred_cube_18_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_18
+layer {
+  name: "integral_y_cube_18_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_18"
+  top: "pred_cube_18_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_18_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_18_y_vec"
+  top: "pred_cube_18_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_18
+layer {
+  name: "integral_z_cube_18_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_18"
+  top: "pred_cube_18_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_18_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_18_z_vec"
+  top: "pred_cube_18_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+
+
+#----integral x cube_19
+layer {
+  name: "integral_x_cube_19_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_19"
+  top: "pred_cube_19_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_19_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_19_x_vec"
+  top: "pred_cube_19_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_19
+layer {
+  name: "integral_y_cube_19_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_19"
+  top: "pred_cube_19_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_19_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_19_y_vec"
+  top: "pred_cube_19_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_19
+layer {
+  name: "integral_z_cube_19_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_19"
+  top: "pred_cube_19_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_19_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_19_z_vec"
+  top: "pred_cube_19_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+
+#----integral x cube_20
+layer {
+  name: "integral_x_cube_20_vec"
+  type: "DeepHandModelIntegralX"
+  bottom: "pred_cube_20"
+  top: "pred_cube_20_x_vec"  
+}
+
+layer {
+  name: "integral_x_cube_20_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_20_x_vec"
+  top: "pred_cube_20_x"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+#----integral y cube_20
+layer {
+  name: "integral_y_cube_20_vec"
+  type: "DeepHandModelIntegralY"
+  bottom: "pred_cube_20"
+  top: "pred_cube_20_y_vec"  
+}
+
+layer {
+  name: "integral_y_cube_20_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_20_y_vec"
+  top: "pred_cube_20_y"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+#----integral z cube_20
+layer {
+  name: "integral_z_cube_20_vec"
+  type: "DeepHandModelIntegralZ"
+  bottom: "pred_cube_20"
+  top: "pred_cube_20_z_vec"  
+}
+
+layer {
+  name: "integral_z_cube_20_vaue"
+  type: "DeepHandModelIntegralVector"
+  bottom: "pred_cube_20_z_vec"
+  top: "pred_cube_20_z"  
+  deep_hand_model_integral_vector_param { 
+     dim_lb: 0.0
+   dim_ub: 64.0
+  }
+}
+
+
+
+
+
+
+#=====get integral 2D from 3D heatmap
+
+layer {
+  name: "gen_pred_joint_2d_fr_3d_hm"
+  type: "Concat"
+  bottom: "pred_cube_0_x"
+  bottom: "pred_cube_0_y"
+  bottom: "pred_cube_1_x"
+  bottom: "pred_cube_1_y"
+  bottom: "pred_cube_2_x"
+  bottom: "pred_cube_2_y"
+  bottom: "pred_cube_3_x"
+  bottom: "pred_cube_3_y"
+  bottom: "pred_cube_4_x"
+  bottom: "pred_cube_4_y"
+  bottom: "pred_cube_5_x"
+  bottom: "pred_cube_5_y"
+  bottom: "pred_cube_6_x"
+  bottom: "pred_cube_6_y"
+  bottom: "pred_cube_7_x"
+  bottom: "pred_cube_7_y"
+  bottom: "pred_cube_8_x"
+  bottom: "pred_cube_8_y"
+  bottom: "pred_cube_9_x"
+  bottom: "pred_cube_9_y"
+  bottom: "pred_cube_10_x"
+  bottom: "pred_cube_10_y"
+  bottom: "pred_cube_11_x"
+  bottom: "pred_cube_11_y"
+  bottom: "pred_cube_12_x"
+  bottom: "pred_cube_12_y"
+  bottom: "pred_cube_13_x"
+  bottom: "pred_cube_13_y"
+  bottom: "pred_cube_14_x"
+  bottom: "pred_cube_14_y"
+  bottom: "pred_cube_15_x"
+  bottom: "pred_cube_15_y"
+  bottom: "pred_cube_16_x"
+  bottom: "pred_cube_16_y"
+  bottom: "pred_cube_17_x"
+  bottom: "pred_cube_17_y"
+  bottom: "pred_cube_18_x"
+  bottom: "pred_cube_18_y"
+  bottom: "pred_cube_19_x"
+  bottom: "pred_cube_19_y"
+  bottom: "pred_cube_20_x"
+  bottom: "pred_cube_20_y"
+  top: "pred_joint_2d_int"
+}
+
+
+
+
+layer {
+  name: "scale_pred_joint_2d"
+  bottom: "pred_joint_2d_int"
+  top: "pred_joint_2d_int_scale"
+  type: "ScaleVector"
+  scale_vector_param {
+     scale_factor: 0.015625
+  }
+ 
+}
+
+
+layer {
+  bottom: "pred_joint_2d_int_scale"
+  bottom: "aug_joint_2d_local"
+  top: "checkgtint2d"
+  name: "checkgtint2d"
+  type: "EuclideanLoss"
+  loss_weight: 0.0
+}
+
+layer {
+  bottom: "aug_joint_2d_local"
+  top: "aug_joint_2d_local_scale"
+  type: "ScaleVector"
+  scale_vector_param {
+     scale_factor: 64.0
+  }
+}
+
+
+layer {
+ name: "sub_xy"
+ top: "sub_xy"
+ bottom: "pred_joint_2d_int"
+ bottom: "aug_joint_2d_local_scale"
+ type: "TwoVectorSubtract"
+ universal_param {
+    take_abs: true
+ }
+}
+
+
+
+#--------------pred joint 3d max
+layer {
+  name: "slice_sub_xy"
+  type: "Slice"
+  bottom: "sub_xy"
+  top: "sub_xy_0"
+  top: "sub_xy_1"
+  top: "sub_xy_2"
+  top: "sub_xy_3"
+  top: "sub_xy_4"
+  top: "sub_xy_5"
+  top: "sub_xy_6"
+  top: "sub_xy_7"
+  top: "sub_xy_8"
+  top: "sub_xy_9"
+  top: "sub_xy_10"
+  top: "sub_xy_11"
+  top: "sub_xy_12"
+  top: "sub_xy_13"
+  top: "sub_xy_14"
+  top: "sub_xy_15"
+  top: "sub_xy_16"
+  top: "sub_xy_17"
+  top: "sub_xy_18"
+  top: "sub_xy_19"
+  top: "sub_xy_20"
+  slice_param {
+     axis: 1
+   slice_point: 2
+   slice_point: 4
+   slice_point: 6
+   slice_point: 8
+   slice_point: 10
+   slice_point: 12
+   slice_point: 14
+   slice_point: 16
+   slice_point: 18
+   slice_point: 20
+   slice_point: 22
+   slice_point: 24
+   slice_point: 26
+   slice_point: 28
+   slice_point: 30
+   slice_point: 32
+   slice_point: 34
+   slice_point: 36
+   slice_point: 38
+   slice_point: 40
+  }  
+}
+
+
+
+layer {
+  name: "gen_pred_depth_fr_3d_hm"
+  type: "Concat"
+  bottom: "pred_cube_0_z"  
+  bottom: "pred_cube_1_z"  
+  bottom: "pred_cube_2_z"  
+  bottom: "pred_cube_3_z"  
+  bottom: "pred_cube_4_z"  
+  bottom: "pred_cube_5_z"  
+  bottom: "pred_cube_6_z"  
+  bottom: "pred_cube_7_z"  
+  bottom: "pred_cube_8_z"  
+  bottom: "pred_cube_9_z"  
+  bottom: "pred_cube_10_z"  
+  bottom: "pred_cube_11_z"  
+  bottom: "pred_cube_12_z"  
+  bottom: "pred_cube_13_z"  
+  bottom: "pred_cube_14_z"  
+  bottom: "pred_cube_15_z" 
+  bottom: "pred_cube_16_z" 
+  bottom: "pred_cube_17_z" 
+  bottom: "pred_cube_18_z" 
+  bottom: "pred_cube_19_z" 
+  bottom: "pred_cube_20_z" 
+  top: "pred_depth_int"
+}
+
+#[0, 1] * 2 - 1
+
+#[-1, 1] + 1 / 2
+layer {
+  name: "scale_pred_depth_int"
+  bottom: "pred_depth_int"
+  top: "pred_depth_int_scale"
+  type: "ScaleVector"
+  scale_vector_param {
+     scale_factor: 0.015625
+  }
+}
+
+layer {
+  name: "mul_pred_depth_int"
+  bottom: "pred_depth_int_scale"
+  top: "pred_depth_int_scale_mul"
+  type: "ScaleVector"
+  scale_vector_param {
+    scale_factor: 2.0
+  }
+}
+
+layer {
+  name: "minus_pred_depth_int"
+  bottom: "pred_depth_int_scale_mul"
+  top:  "pred_depth_int_scale_minus"
+  type: "AddVectorByConstant"
+  add_vector_by_constant_param {
+     add_value: -1
+  }
+}
+
+
+#[-1, 1]
+layer {
+  bottom: "pred_depth_int_scale_minus"
+  bottom: "gt_depth"
+  top: "checkgtdepth"
+  name: "checkgtdepth"
+  type: "EuclideanLoss"
+  loss_weight: 0.0
+}
+
+
+
+
+#[-1, 1] + 1 / 2
+
+layer {
+  name: "gt_depth_add"
+  bottom: "gt_depth"
+  top:  "gt_depth_add"
+  type: "AddVectorByConstant"
+  add_vector_by_constant_param {
+     add_value: 1
+  }
+}
+
+layer {
+  name: "scale_gt_depth_add"
+  bottom: "gt_depth_add"
+  top: "scale_gt_depth_add"
+  type: "ScaleVector"
+  scale_vector_param {
+     scale_factor: 32
+  }
+}
+
+
+layer {
+ name: "sub_z"
+ top: "sub_z"
+ bottom: "pred_depth_int"
+ bottom: "scale_gt_depth_add"
+ type: "TwoVectorSubtract"
+ universal_param {
+    take_abs: true
+ }
+}
+
+
+#--------------
+layer {
+  name: "slice_sub_z"
+  type: "Slice"
+  bottom: "sub_z"
+  top: "sub_z_0"
+  top: "sub_z_1"
+  top: "sub_z_2"
+  top: "sub_z_3"
+  top: "sub_z_4"
+  top: "sub_z_5"
+  top: "sub_z_6"
+  top: "sub_z_7"
+  top: "sub_z_8"
+  top: "sub_z_9"
+  top: "sub_z_10"
+  top: "sub_z_11"
+  top: "sub_z_12"
+  top: "sub_z_13"
+  top: "sub_z_14"
+  top: "sub_z_15"
+  top: "sub_z_16"
+  top: "sub_z_17"
+  top: "sub_z_18"
+  top: "sub_z_19"
+  top: "sub_z_20"
+  
+  slice_param {
+     axis: 1
+   slice_point: 1
+   slice_point: 2
+   slice_point: 3
+   slice_point: 4
+   slice_point: 5
+   slice_point: 6
+   slice_point: 7
+   slice_point: 8
+   slice_point: 9
+   slice_point: 10
+   slice_point: 11
+   slice_point: 12
+   slice_point: 13
+   slice_point: 14
+   slice_point: 15   
+   slice_point: 16
+   slice_point: 17
+   slice_point: 18
+   slice_point: 19
+   slice_point: 20
+  }  
+}
+
+
+
+layer {
+  type: "Concat"
+  bottom: "sub_xy_0"
+  bottom: "sub_z_0"
+  bottom: "sub_xy_1"
+  bottom: "sub_z_1"
+  bottom: "sub_xy_2"
+  bottom: "sub_z_2"
+  bottom: "sub_xy_3"
+  bottom: "sub_z_3"
+  bottom: "sub_xy_4"
+  bottom: "sub_z_4"
+  bottom: "sub_xy_5"
+  bottom: "sub_z_5"
+  bottom: "sub_xy_6"
+  bottom: "sub_z_6"
+  bottom: "sub_xy_7"
+  bottom: "sub_z_7"
+  bottom: "sub_xy_8"
+  bottom: "sub_z_8"
+  bottom: "sub_xy_9"
+  bottom: "sub_z_9"
+  bottom: "sub_xy_10"
+  bottom: "sub_z_10"
+  bottom: "sub_xy_11"
+  bottom: "sub_z_11"
+  bottom: "sub_xy_12"
+  bottom: "sub_z_12"
+  bottom: "sub_xy_13"
+  bottom: "sub_z_13"
+  bottom: "sub_xy_14"
+  bottom: "sub_z_14"
+  bottom: "sub_xy_15"
+  bottom: "sub_z_15"
+  bottom: "sub_xy_16"
+  bottom: "sub_z_16"
+  bottom: "sub_xy_17"
+  bottom: "sub_z_17"
+  
+  bottom: "sub_xy_18"
+  bottom: "sub_z_18"
+  bottom: "sub_xy_19"
+  bottom: "sub_z_19"
+  bottom: "sub_xy_20"
+  bottom: "sub_z_20"
+  top: "sub_xyz"
+  name: "sub_xyz"
+}
+
+
+
+
+
+
+
+layer {
+  type: "JointAbsLoss"
+  bottom: "sub_xyz"
+  top: "zabsloss"
+  name: "zabsloss"
+  loss_weight: 1.0
+
+}
+
+
+
+
+layer {
+  type: "Concat"
+  bottom: "loc_xy_0"
+  bottom: "loc_xy_1"
+  bottom: "loc_xy_2"
+  bottom: "loc_xy_3"
+  bottom: "loc_xy_4"
+  bottom: "loc_xy_5"
+  bottom: "loc_xy_6"
+  bottom: "loc_xy_7"
+  bottom: "loc_xy_8"
+  bottom: "loc_xy_9"
+  bottom: "loc_xy_10"
+  bottom: "loc_xy_11"
+  bottom: "loc_xy_12"
+  bottom: "loc_xy_13"
+  bottom: "loc_xy_14"
+  bottom: "loc_xy_15"
+  bottom: "loc_xy_16"
+  bottom: "loc_xy_17"
+  bottom: "loc_xy_18"
+  bottom: "loc_xy_19"
+  bottom: "loc_xy_20"
+  top: "gt_xy"
+  name: "gt_xy"
+}
+
+
+
+layer {
+  bottom: "gt_xy"
+  bottom: "gt_xy"
+  top: "gt_xynothing"
+  name: "gt_xynothing"
+  type: "EuclideanLoss"
+  loss_weight: 0.0
+}
+
+
+
+
+#------local 2 global 3d 
+layer {
+  name: "get_pred_global_3d"
+  type: "DeepHandModelProjectionLocal2Global3D"
+  bottom: "pred_joint_2d_int_scale"
+  bottom: "pred_depth_int_scale_minus"
+  bottom: "ext_bbx_x1"
+  bottom: "ext_bbx_y1"
+  bottom: "min_z"
+  bottom: "ext_bbx_x2"
+  bottom: "ext_bbx_y2"
+  bottom: "max_z"
+  top: "pred_joint_3d_global"
+}
+
+
+
+
+
+#------Visualize predicted joint on the map
+layer {
+  name: "vis_pred_joint"
+  type: "DeepHandModelOutputJointOnSkeletonMap"
+  
+  bottom: "depth"  
+  bottom: "aug_depth_img"
+  bottom: "image_index"
+  bottom: "pred_joint_2d_int_scale"
+  bottom: "aug_joint_2d_local"
+  
+  deep_hand_model_output_joint_on_skeleton_param {
+	use_raw_rgb_image: false
+	read_from_disk: false
+	
+	show_gt: false
+	save_path: "t/"
+	save_size: 256
+	
+	skeleton_size: 256
+	load_skeleton: true
+	alpha: 255
+	beta: 0
+  }
+  
+}
+
+
+#[0, 200]
+layer {
+  type: "ScaleVector"
+  bottom: "pred_joint_2d_int_scale"
+  top: "pred_joint_2d_int_scale_200"
+  name: "pred_joint_2d_int_scale_200"
+  scale_vector_param {
+     scale_factor: 200.0
+  }
+}
+
+
+layer {
+  name: "aug_joint_2d_local_s"
+  bottom: "aug_joint_2d_local"
+  top: "aug_joint_2d_local_s"
+  type: "ScaleVector"
+  scale_vector_param {
+     scale_factor: 200.0
+  }
+}
+
+#[-100, 100]
+layer {
+  name: "pred_depth_int_scale_minus_100"
+  bottom: "pred_depth_int_scale_minus"
+  top: "pred_depth_int_scale_minus_100"
+  type: "ScaleVector"
+  scale_vector_param {
+    scale_factor: 100.0
+  }
+}
+
+
+#[-100, 100]
+layer {
+  name: "gt_depth_s"
+  bottom: "gt_depth"
+  top: "gt_depth_s"
+  type: "ScaleVector"
+  scale_vector_param {
+     scale_factor: 100.0
+  }
+}
+
+#3d bm from joint (img coordinate + depth)
+layer {
+  type: "DeepHandModelGen3DSkeletonMapPerChannel"
+  bottom: "pred_joint_2d_int_scale_200"
+  bottom: "pred_depth_int_scale_minus_100"
+  top: "pred_3dbm"
+  name: "pred_3dbm"
+  gen_3d_skeleton_map_param {
+     x_lb: 0.0
+	 x_ub: 200.0
+	 y_lb: 0.0
+	 y_ub: 200.0
+	 z_lb: -100.0
+	 z_ub: 100.0
+	 depth_dims: 32
+	 map_size: 32
+	 line_width: 3
+	 endpoint_dist_threshold: 3
+     color_label_option: 0	 
+	 
+	 dot_product: true 
+	 gamma: 0.1
+	 
+	 perform_backprop: true
+  }
+}
+
+
+layer {
+  type: "DeepHandModelGen3DSkeletonMapPerChannel"
+  bottom: "aug_joint_2d_local_s"
+  bottom: "gt_depth_s"
+  top: "label_3dbm"
+  name: "label_3dbm"
+  gen_3d_skeleton_map_param {
+     x_lb: 0.0
+	 x_ub: 200.0
+	 y_lb: 0.0
+	 y_ub: 200.0
+	 z_lb: -100.0
+	 z_ub: 100.0
+	 depth_dims: 32
+	 map_size: 32
+	 line_width: 3
+	 endpoint_dist_threshold: 3
+     color_label_option: 0	 
+	 
+	 dot_product: true 
+	 gamma: 0.1
+  }
+}
+
+
+
+#layer {
+#  bottom: "pred_3dbm"
+#  bottom: "label_3dbm"
+#  top: "zloss_3dbm_l2"
+#  name: "zloss_3dbm_l2"
+#  type: "EuclideanLoss"
+#  loss_weight: 0.0
+#}
+
+
+
+layer {
+  bottom: "pred_3dbm"
+  bottom: "label_3dbm"
+  top: "zloss_3dbm_l1"
+  name: "zloss_3dbm_l1"
+  type: "SmoothL1Loss"
+  loss_weight: 0.00
+}
+
+layer {
+  top: "ada"
+  name: "ada"
+  type: "AdaptiveWeightEucLoss"
+  bottom: "pred_joint_2d_int_scale"
+  bottom: "aug_joint_2d_local"
+  bottom: "pred_depth_int_scale_minus"
+  bottom: "gt_depth"
+  #bottom: "pred_3dbm"
+  #bottom: "label_3dbm"
+  loss_weight: 0.0
+  
+}
+
+
+
+
+
+
+#=====output 3d ske per channel 
+
+
+#layer {
+#  bottom: "label_3dbm"
+#  top: "heatmap_3dbm_flat"
+#  name: "heatmap_3dbm_flat"
+#  type: "Flatten"
+#  
+#}
+
+
+
+#layer {
+#  type: "OutputBlob"
+#  bottom: "heatmap_3dbm_flat"
+#  bottom: "image_index"
+#  output_blob_param {
+#      save_path: "g/"
+#	  blob_name: "g"
+#	  if_per_section_output: true
+#	  per_section_row_num: 64
+#	  per_section_col_num: 64
+#   }
+#}
+
+
+
+
+#show mpjpe pred 2 gt 
+layer {
+  bottom: "pred_joint_3d_global"
+  bottom: "aug_joint_3d_global"
+  top: "zmpjpe"
+  name: "zmpjpe"
+  type: "Joint3DSquareRootLoss"
+  loss_weight: 0.0
+}
