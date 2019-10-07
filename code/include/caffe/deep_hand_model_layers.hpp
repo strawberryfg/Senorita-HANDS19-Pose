@@ -264,38 +264,6 @@ namespace caffe {
 		bool perform_backprop_;
 	};
 
-	//3D Segmentation Map
-	template <typename Dtype>
-	class DeepHandModelGen3DSegMapPerChannelLayer : public Layer<Dtype> {
-	public:
-		explicit DeepHandModelGen3DSegMapPerChannelLayer(const LayerParameter& param)
-			: Layer<Dtype>(param) { }
-		virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-			const vector<Blob<Dtype>*>& top);
-		virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-			const vector<Blob<Dtype>*>& top);
-
-		virtual inline const char* type() const { return "DeepHandModelGen3DSegMapPerChannel"; }
-		virtual inline int ExactNumBottomBlobs() const { return 13; }
-		virtual inline int ExactNumTopBlobs() const { return 1; }
-
-	protected:
-		virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-			const vector<Blob<Dtype>*>& top);
-		virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-			const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-
-		int map_size_;
-		int depth_dims_;
-		
-		float gamma_;
-		bool perform_backprop_;
-
-		int depth_size_;
-
-		double focusx_, focusy_, u0offset_, v0offset_; 
-	};
-
 	template <typename Dtype>
 	class DeepHandModelGen3DSkeletonMapLayer : public Layer<Dtype> {
 	public:
