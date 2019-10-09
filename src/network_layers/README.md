@@ -21,7 +21,7 @@ Return the revised bounding box of depth patch, 3D cube bounding box, and 2D ima
 
 ## DeepHandModelPinholeCameraOrigin
 ``` 
-Projecting real-world 3D coordinates to 2D. (on raw depth image)
+Project real-world 3D coordinates to 2D. (on raw depth image)
 ``` 
 
 ## DeepHandModelReadDepthNoBBXWithAVGZAug
@@ -53,5 +53,15 @@ See [this pdf](https://github.com/strawberryfg/c2f-3dhm-human-caffe/blob/master/
 
 ## DeepHandModelProjectionLocal2Global3D
 ``` 
-Normalized 2D in bbx ([0, 1]) & normalized depth ([-1, 1]) -> real_world 3D
+Normalized 2D in bbx ([0, 1]) & normalized depth ([-1, 1]) -> real_world 3D.
+```
+
+## DeepHandModelOutputJointOnSkeletonMap
+``` 
+Overlay 2D joints on the depth image.
+```
+
+## DeepHandModelGen3DSkeletonMapPerChannel
+``` 
+Render 3D skeleton volume based on 2D & depth.
 ```
