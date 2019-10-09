@@ -44,3 +44,9 @@ Return the normalized 2D coordinates in the cropped bounding box. (in [0, 1])
 ``` 
 Return the normalized 3D coordinates in the 200x200x200 cube.
 ```
+
+## DeepHandModelIntegralX DeepHandModelIntegralY DeepHandModelIntegralZ DeepHandModelIntegralVector
+``` 
+Integral operation. Along X, Y, Z axis. 
+```
+See [this pdf](https://github.com/strawberryfg/c2f-3dhm-human-caffe/blob/master/caffe_code/code.pdf) for details.
