@@ -16,7 +16,7 @@ To configure my personalized layers, you will have to add **hpp** files and **ne
 
 ## DeepHandModelGetHands19ChaDepth
 ``` 
-Output the revised bounding box of depth patch, 3D cube bounding box, and 2D image center coordinate (pixel location of center of mass).
+Return the revised bounding box of depth patch, 3D cube bounding box, and 2D image center coordinate (pixel location of center of mass).
 ``` 
 
 ## DeepHandModelPinholeCameraOrigin
@@ -27,4 +27,14 @@ Projecting real-world 3D coordinates to 2D. (on raw depth image)
 ## DeepHandModelReadDepthNoBBXWithAVGZAug
 ``` 
 Return the random augmented depth image and augmented 3D location in the fixed-size cube.
+``` 
+
+## DeepHandModelCubiodIntoGlobalV2
+``` 
+Return the augmented 3D location in the real-world coordinate.
+``` 
+
+## DeepHandModelProjectionGlobal2Local
+``` 
+Return the normalized 2D coordinate in the cropped bounding box. (in [0, 1])
 ``` 
