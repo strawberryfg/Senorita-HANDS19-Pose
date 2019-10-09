@@ -1,3 +1,5 @@
 # Custom Network Layers
 
+[*Spoiler*] The code is not intuituive or easy to use whatsoever, and I apologize for this. This is due, in some part to the framework and the language, which I cannot control. If you are seeking for a solution that produces state-of-the-art results while at the same time being easily comprehended in 10 minutes, consider closing this page.
+
 You may find these three repos [c2f](https://github.com/strawberryfg/c2f-3dhm-human-caffe), [intreg](https://github.com/strawberryfg/int-3dhuman-I1), [DeepModel](https://github.com/strawberryfg/DeepModel_hand) useful to have a sense of how custom layers are defined and deployed in the framework. This is *potentially more difficult* than PyTorch, Keras.
