@@ -20,6 +20,8 @@
     |   |-- ### line 494 - 521
 `-- |-- Copy cropped area
     |   |-- ### line 573 - 583 (to handMat)
+`-- |-- Optionally prune outliers whose depth values fall out of the cropped 3D bounding box
+    |   |-- ### line 586 - 599 (z outside the [-100, 100])
     `-- |-- save original bounding box provided by the author
         |   |-- ### line 895
     `-- |-- save 3d joints annotation in real-world coordinate 
