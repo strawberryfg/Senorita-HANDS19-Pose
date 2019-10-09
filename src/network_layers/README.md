@@ -5,7 +5,7 @@
 You may find these three repos [c2f](https://github.com/strawberryfg/c2f-3dhm-human-caffe), [intreg](https://github.com/strawberryfg/int-3dhuman-I1), [DeepModel](https://github.com/strawberryfg/DeepModel_hand) useful to have a sense of how custom layers are defined and deployed in the framework. This is *potentially more difficult* than PyTorch, Keras.
 
 
-## Installation
+# Installation
 For the time being I am using this [framework](https://github.com/happynear/caffe-windows) by happynear, as you see I have only access to a Windows laptop. But it should work fine under Ubuntu too.
 
 To configure my personalized layers, you will have to add **hpp** files and **new cpp** files. See the above repos or [this page](https://github.com/BVLC/caffe/wiki/Development) to get an idea.
