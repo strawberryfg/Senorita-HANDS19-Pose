@@ -24,8 +24,9 @@ For PyTorch users, it's quite easy to transform weights across DL frameworks. (e
 
 * Simple and easy code. EASY MONEY (**NO**)
 * Data processing code for HANDS19 Dataset.
-* Code of multiple input representations.
-* A lightweight refinement network that is based on ```Patch-based Human Pose Refinement``` and ```DeepPrior```. Easily replacable by networks e.g. ShuffleNet, MobileNet etc.
+* Code of multiple input representations that is widely applicable.
+* Code of a 3D skeleton volumes renderer that can be appended to any existing method.
+* A lightweight refinement network that is based on ```Patch-based Human Pose Refinement``` and ```DeepPrior```. Can be easily substituted by networks e.g. ShuffleNet, MobileNet etc.
 
 # Data
 Please go to the [official webpage](https://sites.google.com/view/hands2019/challenge) and fill the form to participate. **Please do not ask me for the data. I am not authorized to release the data, neither do I have permission to redistribute it.**
