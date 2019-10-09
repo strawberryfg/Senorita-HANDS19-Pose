@@ -9,3 +9,7 @@ The work-flow is described below.
 - You get the adjusted ```bbx```, ```avgX```, ```avgY```, ```avgZ```, ```avgU```, ```avgV```
 
 - Now you are able to ```crop the depth patch``` and augment it! In the meantime, the ```3D pose ground truth``` needs augmentation. Also, you may want to consider producing ```3D points projection```, ```multi-layer depth maps```, ```depth voxel```, all of which act as possible system input representation.
+
+- You obtain augmented ground truth of ```2D``` & ```3D``` & ```depth```, either in ```local``` coordinate space or ```global```.
+
+- You start to articulate the system input depending on which model you would like to use.
