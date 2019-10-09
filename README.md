@@ -14,5 +14,3 @@ Please go to the [official webpage](https://sites.google.com/view/hands2019/chal
 
 The following steps are required to preprocess the data.
 1. Run ```${POSE_ROOT}/src/preprocessing/DemoSeeBBX/DemoSeeBBX.cpp```
-
-You may have to change the directory path accordingly. Easy stuff.
