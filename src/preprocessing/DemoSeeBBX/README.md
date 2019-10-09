@@ -13,6 +13,9 @@
         |   |-- ### Deploy "GetRidOfBackground". Remove palpable pixels which are outliers.
     `-- |-- Rough centroid(2.5D) calculation (center of mass) 
         |   |-- ### Deploy "calcBoxCenter()" w/ option = 0
+    `-- |-- Reset bounding box w/ CoM 
+        |   |-- ### line 981 new box size: 500.0 / avgZ * 210.0 (smaller avgZ = closer hand = larger cropped size)
+	
 	
 
        
