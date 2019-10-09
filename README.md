@@ -23,3 +23,5 @@ The following steps are required to preprocess the data.
   ```
   caffe train --solver=solver_aug_lfd.prototxt --weights=../mks.caffemodel --gpu 0
   ```
+- Train w/ only integral loss 
+*[NOTE]*
