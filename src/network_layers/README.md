@@ -19,7 +19,12 @@ To configure my personalized layers, you will have to add **hpp** files and **ne
 Output the revised bounding box of depth patch, 3D cube bounding box, and 2D image center coordinate (pixel location of center of mass).
 ``` 
 
-## "DeepHandModelPinholeCameraOrigin"
+## DeepHandModelPinholeCameraOrigin
 ``` 
-Projecting real-world 3D coordinates to raw depth image.
+Projecting real-world 3D coordinates to 2D. (on raw depth image)
+``` 
+
+## DeepHandModelReadDepthNoBBXWithAVGZAug
+``` 
+Return the random augmented depth image and augmented 3D location in the fixed-size cube.
 ``` 
