@@ -18,4 +18,4 @@ The following steps are required to preprocess the data.
 
 # Work it over
 ## Train
-``cd``` enter into any one of the four folders, ```M1``` & ```M2``` & ```M3``` & ```M4```
+```cd``` enter into any one of the four folders, ```M1``` & ```M2``` & ```M3``` & ```M4```
