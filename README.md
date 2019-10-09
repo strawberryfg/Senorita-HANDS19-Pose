@@ -32,11 +32,11 @@ The following steps are required to preprocess the data.
 
 # Work it over
 ## Train
-**[NOTE]** CHANGE THE TRAINING SCHEDULE AND SEE IF THE RESULT GETS IMPROVED. INCLUDING BUT NOT LIMITED TO BASE LEANRING RATE, STEPS TO SLOWER THE LEARNING RATE, LOSS WEIGHT RATIOS.
+**[NOTE]** CHANGE THE TRAINING SCHEDULE AND SEE IF THE RESULT GETS IMPROVED. INCLUDING BUT NOT LIMITED TO BASE LEARNRING RATE, STEPS TO SLOWER THE LEARNING RATE, LOSS WEIGHT RATIOS.
 
 Now let's get started.
 
-```cd ${POSE_ROOT}/experiments/train``` enter into any one of the four folders, ```M1``` & ```M2``` & ```M3``` & ```M4```. Let's say ```M1```.
+```cd ${POSE_ROOT}/experiments/train``` enter into any of the four folders, ```M1``` & ```M2``` & ```M3``` & ```M4```. Let's say ```M1```.
 - Train w/ only integral loss 
   ```
   caffe train --solver=solver_aug_lfd.prototxt --weights=../mks.caffemodel --gpu 0
@@ -50,7 +50,7 @@ Now let's get started.
   ```
   caffe train --solver=solver_aug_lfd_patch.prototxt --weights=YYYY.caffemodel --gpu 0
   ```
-  YYYY is the model of last step. Ensure that the initial pose estimator does not dominate the loss, meaning that the MPJPE error of refined pose ought to be smaller than the initial estimate.
+  YYYY is the model of the last step. Ensure that the initial pose estimator does not dominate the loss, meaning that the MPJPE error of refined pose ought to be smaller than the initial estimate.
   
 Switch to [this page](https://github.com/strawberryfg/Senorita-HANDS19-Pose/tree/master/src/network_layers) for the code about rendering and refinement.
 
