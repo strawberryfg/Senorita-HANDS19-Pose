@@ -28,3 +28,5 @@ The work-flow is described below.
   - 20 per-bone refinement subnetworks add up to a ```residual orientation vector```, which is added to the initial orientation.
   - Now that you have the refined orientation vector, as well as root location from the initial 3D estimate, you achieve the ```refined 3D pose```.
   - This refined 3D pose is our ```final output```.
+  - So how do we achieve the balance between ```initial pose estimator``` and ```patch-based refinement```? That's why I initially introduced the adaptive loss weight balancing layer.
+  - Again, it's convenient to overlay the refined 2D, output the refined 3D for visualization purpose.
