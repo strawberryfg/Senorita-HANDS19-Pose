@@ -17,6 +17,7 @@
 ```
 		
 ## Functions
+**GetRidOfBackground()**
 ``` shell
 |-- GetRidOfBackground()
 `-- |-- Extend the rectangle to square 
@@ -39,9 +40,11 @@
         |   |   |-- DeepHumanModel
         |   |   |   |-- deep_human_model_argmax_2d_hm_layer.cpp 
         |   |   |   |-- ### This takes argmax operation on 2d heatmap 
+``` 
 
-
-		
+	
+**calcBoxCenter()**
+``` shell	
 |-- calcBoxCenter(): Acquire centroid of the cropped depth point cloud
 `-- |-- Compute the average UVD (2.5D coordinate mean values) of the cropped depth image
     |   |-- ### line 137 - 168 mean(u, v, d); pixel coordinate + depth value 
@@ -52,6 +55,7 @@
         |   |   |   |   |   |-- ### line 178 - 203 If cannot find forcibly set the depth to 500.0 
 `-- |-- Else: 2.5D -> 3D save to avgX, avgY, avgZ
         |   |-- ### line 171
+``` 
 		
 		
 		
