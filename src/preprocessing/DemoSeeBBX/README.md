@@ -4,7 +4,7 @@
 
 ``` shell
 |-- Main Function Process()
-`-- |-- include
+`-- |-- For each sample (<div class="text-blue mb-2"> line 1112 </div>)
     `-- |-- caffe
         |   |-- deep_human_model_layers.hpp
         |   |   | ### This includes operations about 2d/3d heatmap /integral / augmentation / local <-> global transformation etc.
