@@ -18,6 +18,8 @@
 |-- GetRidOfBackground()
 `-- |-- Extend the rectangle to square 
     |   |-- ### line 494 - 521
+`-- |-- Copy cropped area
+    |   |-- ### line 573 - 583 (to handMat)
     `-- |-- save original bounding box provided by the author
         |   |-- ### line 895
     `-- |-- save 3d joints annotation in real-world coordinate 
