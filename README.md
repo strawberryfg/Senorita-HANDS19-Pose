@@ -18,4 +18,8 @@ The following steps are required to preprocess the data.
 
 # Work it over
 ## Train
-```cd``` enter into any one of the four folders, ```M1``` & ```M2``` & ```M3``` & ```M4```
+```cd``` enter into any one of the four folders, ```M1``` & ```M2``` & ```M3``` & ```M4```. Let's say ```M1```.
+- Train w/ only integral loss 
+  ```
+  caffe train --solver=solver_aug_lfd.prototxt --weights=../mks.caffemodel --gpu 0
+  ```
