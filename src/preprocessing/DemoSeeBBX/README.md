@@ -10,11 +10,14 @@
     `-- |-- Save 3d joints annotation in real-world coordinate 
         |   |-- ### line 927
     `-- |-- Rough background subtraction
-        |   |-- ### Deploy "GetRidOfBackground". Remove palpable pixels which are outliers.
+        |   |-- ### line 955 Deploy "GetRidOfBackground". Remove palpable pixels which are outliers.
     `-- |-- Rough CoM (center of mass; 2.5D) calculation  
-        |   |-- ### Deploy "calcBoxCenter()" w/ option = 0
+        |   |-- ### line 965 Deploy "calcBoxCenter()" w/ option = 0
     `-- |-- Fine bounding box reset w/ CoM 
-        |   |-- ### line 981 new box size: 500.0 / avgZ * 210.0 (smaller avgZ = closer hand = larger crop size)
+        |   |-- ### line 981 - 997 new box size: 500.0 / avgZ * 210.0 (smaller avgZ = closer hand = larger crop size)
+    `-- |-- Fine background subtraction
+        |   |-- ### line 1002 Deploy "GetRidOfBackground". This time abandons pixel with depth outside the reasonable depth range [avgZ - 100, avgZ + 100]
+	
 	
 	
 
