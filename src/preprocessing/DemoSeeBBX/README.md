@@ -11,6 +11,8 @@
         |   |-- ### line 927
     `-- |-- Rough background subtraction
         |   |-- ### Deploy "GetRidOfBackground". Remove palpable pixels which are outliers.
+    `-- |-- Rough centroid(2.5D) calculation (center of mass) 
+        |   |-- ### Deploy "calcBoxCenter()" w/ option = 0
 	
 
        
