@@ -20,6 +20,13 @@ For PyTorch users, it's quite easy to transform weights across DL frameworks. (e
 |:-:|:-:|:-:|:-:|:-:|
 | 19.65 | 8.45 | 14.28 | 7.53 | 14.21 |
 
+# Features
+
+* Simple and easy code. EASY MONEY (**NO**)
+* Data processing code for HANDS19 Dataset.
+* Code of multiple input representations.
+* A lightweight refinement network that is based on ```Patch-based Human Pose Refinement``` and ```DeepPrior```. Easily replacable by networks e.g. ShuffleNet, MobileNet etc.
+
 # Data
 Please go to the [official webpage](https://sites.google.com/view/hands2019/challenge) and fill the form to participate. **Please do not ask me for the data. I am not authorized to release the data, neither do I have permission to redistribute it.**
 
