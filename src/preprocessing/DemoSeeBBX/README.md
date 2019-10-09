@@ -4,8 +4,8 @@
 
 ``` shell
 |-- Main Function Process()
-`-- |-- For each sample (<div class="text-blue mb-2"> line 1112 </div>)
-    `-- |-- caffe
+`-- |-- For each sample 
+    `-- |-- read & save original bounding box provided by the author 
         |   |-- deep_human_model_layers.hpp
         |   |   | ### This includes operations about 2d/3d heatmap /integral / augmentation / local <-> global transformation etc.
         |   |-- h36m.h
