@@ -20,9 +20,9 @@ The following steps are required to preprocess the data.
 | Method | Weight Model  |
 |:-:|:-:|
 | M1     | [M1](https://drive.google.com/file/d/1jH50yED6Jr6uAAlomvn5AGdaDaHGoLhD/view?usp=sharing) |
-| M2     | [M2](https://drive.google.com/file/d/1jH50yED6Jr6uAAlomvn5AGdaDaHGoLhD/view?usp=sharing) |
-| M3     | [M3](https://drive.google.com/file/d/1jH50yED6Jr6uAAlomvn5AGdaDaHGoLhD/view?usp=sharing) |
-| M4     | [M4](https://drive.google.com/file/d/1jH50yED6Jr6uAAlomvn5AGdaDaHGoLhD/view?usp=sharing) |
+| M2     | [M2](https://drive.google.com/file/d/1lPXogZKChtGbpjEQQLDYf3493XKyng1V/view?usp=sharing) |
+| M3     | [M3](https://drive.google.com/file/d/1ddOyxxqLffyjzeYkm1c9heu4wl_zAEh4/view?usp=sharing) |
+| M4     | [M4](https://drive.google.com/file/d/1A9i4bIH53C90EXHIiV5iTOIZdT1VbLoo/view?usp=sharing) |
 
 # Work it over
 ## Train
