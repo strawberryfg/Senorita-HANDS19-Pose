@@ -16,6 +16,6 @@ The work-flow is described below.
 
 - You run the ```initial pose estimator```, which in this case is the [integral regression](https://github.com/strawberryfg/int-3dhuman-I1). As a result, predicted ```3D``` & ```2D```, either in ```local``` & ```global``` are computed. You observe the ```MPJPE``` error in ```mm```. 
 
-- You may optionally opt to overlay predicted 2D on the depth image, and output the prediction to store the initial estimate result.
+- You may optionally opt to ```overlay predicted 2D``` on the depth image, and output the prediction to store the initial estimate result.
 
-- 3D skeleton volumes renderer takes predicted 2D & depth as input, and synthesize a volume. Which is then compared against ground truth. This *pseudo analysis by synthesis* (**NO, IT'S NOT**) is another explicit loss function merely to accelerate and enhance the training.
+- ```3D skeleton volumes``` renderer takes predicted 2D & depth as input, and synthesize a volume. Which is then compared against ground truth. This *pseudo analysis by synthesis* (**NO, IT'S NOT**) is another explicit loss function merely to accelerate and enhance the training.
