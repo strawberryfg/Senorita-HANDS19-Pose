@@ -1,6 +1,7 @@
 # Data Preprocessing
 
-## 
+## Pipeline
+
 |-- Main Function "Process()"
 `-- |-- include
     `-- |-- caffe
