@@ -17,8 +17,12 @@
         |   |-- ### line 981 - 997 new box size: 500.0 / avgZ * 210.0 (smaller avgZ = closer hand = larger crop size)
     `-- |-- Fine background subtraction
         |   |-- ### line 1002 Deploy "GetRidOfBackground". This time abandons pixel with depth outside the reasonable depth range [avgZ - 100, avgZ + 100]
+    `-- |-- Fine CoM recalculation
+        |   |-- ### line 1007 Deploy "calcBoxCenter()" w/ option = 1; Direct averaging 2.5D 
+    `-- |-- Resize to a 256x256 patch of depth values normalized to [-1, 1]
+        |   |-- ### line 1015 - 1026
 	
-	
+	 
 	
 
        
