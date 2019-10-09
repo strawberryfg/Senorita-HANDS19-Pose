@@ -30,7 +30,7 @@ The following steps are required to preprocess the data.
 
 Now let's get started.
 
-```cd``` enter into any one of the four folders, ```M1``` & ```M2``` & ```M3``` & ```M4```. Let's say ```M1```.
+```cd ${POSE_ROOT}/experiments/train``` enter into any one of the four folders, ```M1``` & ```M2``` & ```M3``` & ```M4```. Let's say ```M1```.
 - Train w/ only integral loss 
   ```
   caffe train --solver=solver_aug_lfd.prototxt --weights=../mks.caffemodel --gpu 0
@@ -49,13 +49,38 @@ Now let's get started.
 Switch to [this page](https://github.com/strawberryfg/Senorita-HANDS19-Pose/tree/master/src/network_layers) for the code about rendering and refinement.
 
 ## Test
+
+```cd ${POSE_ROOT}/experiments/test``` Download the models and place to corresponding folders. Enter either of the four folders.
+
+
 - ```M1```
 
   Run
   
   ```
-  caffe test -model 
+  caffe test -model test_aug_lfd_patch.prototxt -weights m1.caffemodel --gpu 0 -iterations 20834
   ```  
 - ```M2```
+
+  Run 
+  
+  ```
+  caffe test -model test_aug_lfd_proj_single_ld_patchref.prototxt -weights m2.caffemodel --gpu 0 -iterations 20834
+  ```
+  
 - ```M3```
+
+  Run 
+  
+  ```
+  caffe test -model test_aug_lfd_proj_single_dv_patchref.prototxt -weights m3.caffemodel --gpu 0 -iterations 20834
+  ```
+  
 - ```M4```
+
+  Run 
+  
+  ```
+  caffe test -model test_patchref.prototxt -weights m4.caffemodel --gpu 0 -iterations 20834
+  ```
+  
