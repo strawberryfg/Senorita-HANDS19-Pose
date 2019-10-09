@@ -22,3 +22,9 @@ The work-flow is described below.
 
 * If you happen to be at the stage where ```patch-based refinement``` is working.
   - Simply search ```"GenBonePatch"``` and you are scurrying to the ```refinement``` part. 
+  - Patches around each bone (20 in total) are generated, which are essentially in a pyramid-like style.
+  - You easily get initial orientation from initial pose estimate.
+  - For each bone, you start building a really simple conv + FC network to estimate the residual orientation of that bone.
+  - 20 per-bone refinement subnetworks add up to a residual orientation vector, which is added to the initial orientation.
+  - Now that you have the refined orientation vector, as well as root location from the initial 3D estimate, you achieve the refined 3D pose.
+  - This refined 3D pose is our final output.
