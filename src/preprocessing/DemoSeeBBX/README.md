@@ -1,6 +1,6 @@
 # Data Preprocessing
 
-## Pipeline
+## Overall Pipeline
 
 ``` shell
 |-- Main Function Process()
@@ -10,8 +10,8 @@
     `-- |-- Save 3d joints annotation in real-world coordinate 
         |   |-- ### line 927
 		
-		
-		
+## Functions
+``` shell
 |-- GetRidOfBackground()
 `-- |-- Extend the rectangle to square 
     |   |-- ### line 494 - 521
