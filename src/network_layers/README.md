@@ -87,3 +87,9 @@ Display MPJPE (mm).
 L1 loss on 2D pixel coordinates & depth predictions. 
 ```
 Reference: [Integral Pose Regression](https://github.com/JimmySuen/integral-human-pose/blob/master/pytorch_projects/common_pytorch/loss/integral.py).
+
+
+## OutputBlob
+``` 
+Output one network blob to disk. (Essentially saving results)
+```
