@@ -10,7 +10,7 @@
     `-- |-- Save 3d joints annotation in real-world coordinate 
         |   |-- ### line 927
     `-- |-- Crop interested depth image patch 
-    `-- |-- |-- Rough background subtraction
+        |   |-- Rough background subtraction
         |   |   |-- ### line 955 Deploy "GetRidOfBackground". Remove palpable pixels which are outliers.
     `-- |-- |-- Rough CoM (center of mass; 2.5D) calculation  
         |   |   |-- ### line 965 Deploy "calcBoxCenter()" w/ option = 0
