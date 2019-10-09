@@ -6,5 +6,3 @@ The work-flow is described below.
 
 - You are given a HDF5 file from which you extract the image index to be trained, the bounding box provided by the organizer, and the 3D ground truth in real-world coordinate.
 
-
-- You get the extended ```bbx```, ```avgX```, ```avgY```, ```avgZ```, ```avgU```, ```avgV```
