@@ -42,7 +42,7 @@
 
 
 		
-|-- calcBoxCenter()
+|-- calcBoxCenter(): Acquire centroid of the cropped depth point cloud
 `-- |-- Compute the average UVD (2.5D coordinate mean values) of the cropped depth image
     |   |-- ### line 137 - 168 mean(u, v, d); pixel coordinate + depth value 
 `-- |-- If option == 0: take the depth of closest non-zero pixel to the cropped image center
@@ -50,6 +50,9 @@
         |   |   |-- ### line 175
         |   |   |   |   |-- If it equals 0.0 BFS to find nearest non-zero pixel starting from the center pixel 
         |   |   |   |   |   |-- ### line 178 - 203 If cannot find forcibly set the depth to 500.0 
+`-- |-- Else: 2.5D -> 3D save to avgX, avgY, avgZ
+        |   |-- ### line 171
+		
 		
 		
 
