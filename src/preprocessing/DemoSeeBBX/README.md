@@ -9,6 +9,9 @@
         |   |-- ### line 895
     `-- |-- Save 3d joints annotation in real-world coordinate 
         |   |-- ### line 927
+    `-- |-- Rough background subtraction
+        |   |-- ### Deploy "GetRidOfBackground". Remove palpable pixels which are outliers.
+	
 
        
 ```
