@@ -12,6 +12,7 @@ For PyTorch users, it's quite easy to transform weights across DL frameworks. (e
 ## Data
 Please go to the [official webpage](https://sites.google.com/view/hands2019/challenge) and fill the form to participate. **Please do not ask me for the data. I am not authorized to release the data, neither do I have permission to redistribute it.**
 
+The following steps are required to preprocess the data.
 1. Run ```${POSE_ROOT}/src/preprocessing/DemoSeeBBX/DemoSeeBBX.cpp```
 
 You may have to change the directory path accordingly. Easy stuff.
