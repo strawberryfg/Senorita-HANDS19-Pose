@@ -27,19 +27,7 @@
 `-- |-- (Optional) prune outliers whose depth values fall out of the cropped 3D bounding box
     |   |-- ### line 586 - 599 (z outside the [-100, 100])
 `-- |-- Run otsu thresholding to single out the foreground
-    |   |-- ### line 625 - 736
-	
-    `-- |-- save original bounding box provided by the author
-        |   |-- ### line 895
-    `-- |-- save 3d joints annotation in real-world coordinate 
-        |   |-- ### line 927
-		
-`-- |-- src
-    `-- |-- caffe
-        |   |-- layers
-        |   |   |-- DeepHumanModel
-        |   |   |   |-- deep_human_model_argmax_2d_hm_layer.cpp 
-        |   |   |   |-- ### This takes argmax operation on 2d heatmap 
+    |   |-- ### line 625 - 736	
 ``` 
 
 	
@@ -57,6 +45,22 @@
         |   |-- ### line 171
 ``` 
 		
+		
+		
+		
+		
+		
+		
+		
+
+``` shell	
+`-- |-- src
+    `-- |-- caffe
+        |   |-- layers
+        |   |   |-- DeepHumanModel
+        |   |   |   |-- deep_human_model_argmax_2d_hm_layer.cpp 
+        |   |   |   |-- ### This takes argmax operation on 2d heatmap 
+``` 
 		
 		
 
