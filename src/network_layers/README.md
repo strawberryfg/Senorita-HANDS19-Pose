@@ -50,3 +50,8 @@ Return the normalized 3D coordinates in the 200x200x200 cube.
 Integral operation. Along X, Y, Z axis. 
 ```
 See [this pdf](https://github.com/strawberryfg/c2f-3dhm-human-caffe/blob/master/caffe_code/code.pdf) for details.
+
+## DeepHandModelProjectionLocal2Global3D
+``` 
+Normalized 2D in bbx ([0, 1]) & normalized depth ([-1, 1]) -> real_world 3D
+```
