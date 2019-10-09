@@ -27,7 +27,8 @@ For PyTorch users, it's quite easy to transform weights across DL frameworks. (e
 * Widely applicable multiple input representations.
 * Easy-to-get add-on: a 3D skeleton volumes renderer.
 * Effective and replaceable refinement network.
-* Neat framework, lucid organization. No gossamer.
+* Neat framework. Lucid organization. No gossamer.
+* Mediocre result. Hmmm.
 
 # Data
 Please go to the [official webpage](https://sites.google.com/view/hands2019/challenge) and fill the form to participate. **Please do not ask me for the data. I am not authorized to release the data, neither do I have permission to redistribute it.**
@@ -109,6 +110,4 @@ Switch to [this page](https://github.com/strawberryfg/Senorita-HANDS19-Pose/tree
   
 
 # Concluding remarks
-No implied shape model. No synthetic images.
-
-Well, the result is mediocre at any rate.
+No implied shape model is enforced at any rate. No synthetic images are used either anyway.
