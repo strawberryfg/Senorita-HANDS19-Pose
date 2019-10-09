@@ -14,7 +14,7 @@ To configure my personalized layers, you will have to add **hpp** files and **ne
 
 ----
 
-**Disclaimer** Some network layers are omitted here for conciseness.
+[**Disclaimer**] Some network layers are omitted here for conciseness.
 
 ## DeepHandModelGetHands19ChaDepth
 ``` 
