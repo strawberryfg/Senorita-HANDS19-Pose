@@ -9,6 +9,12 @@ This repo is our implementation for the [HANDS19 Challenge Task 1 - Depth-Based 
 
 For PyTorch users, it's quite easy to transform weights across DL frameworks. (e.g. [this repo](https://github.com/xxradon/PytorchToCaffe)) This project applies to both Ubuntu and Windows. Piece of cake!
 
+
+# Result
+| EXTRAP. | INTERP. | SHAPE. | ARTIC. | VIEWP. |
+|:-:|:-:|:-:|:-:|:-:|
+| 19.65 | 8.45 | 14.28 | 7.53 | 14.21 |
+
 # Data
 Please go to the [official webpage](https://sites.google.com/view/hands2019/challenge) and fill the form to participate. **Please do not ask me for the data. I am not authorized to release the data, neither do I have permission to redistribute it.**
 
