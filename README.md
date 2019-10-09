@@ -8,6 +8,7 @@
 
 This repo is our implementation for the [HANDS19 Challenge Task 1 - Depth-Based 3D Hand Pose Estimation](https://competitions.codalab.org/competitions/20913#learn_the_details) entry. A full report is here.
 
+
 # Environment
 - Dell Alienware R4 Laptop w/ one 8GB Geforce GTX 1070.
 
@@ -33,6 +34,8 @@ The following steps are required to preprocess the data.
 | M2     | [M2](https://drive.google.com/file/d/1lPXogZKChtGbpjEQQLDYf3493XKyng1V/view?usp=sharing) |
 | M3     | [M3](https://drive.google.com/file/d/1ddOyxxqLffyjzeYkm1c9heu4wl_zAEh4/view?usp=sharing) |
 | M4     | [M4](https://drive.google.com/file/d/1A9i4bIH53C90EXHIiV5iTOIZdT1VbLoo/view?usp=sharing) |
+
+```mks.caffemodel``` is pretrained weights on Human3.6M using integral regression (I*), including a ResNet50 backbone and a simple deconvolution head, which is released [here](https://drive.google.com/file/d/1NeOA3HWPHftAF9GGFXsXetH3gcHWt_rH/view?usp=sharing).
 
 # Work it over
 ## Train
@@ -93,4 +96,5 @@ Switch to [this page](https://github.com/strawberryfg/Senorita-HANDS19-Pose/tree
   ```
   caffe test -model test_patchref.prototxt -weights m4.caffemodel --gpu 0 -iterations 20834
   ```
+
   
