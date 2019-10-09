@@ -38,3 +38,9 @@ Return the augmented 3D locations in the real-world coordinate.
 ``` 
 Return the normalized 2D coordinates in the cropped bounding box. (in [0, 1])
 ``` 
+
+
+## DeepHandModelNormalize3DIntoCubiodV2
+``` 
+Return the normalized 3D coordinates in the 200x200x200 cube.
+```
