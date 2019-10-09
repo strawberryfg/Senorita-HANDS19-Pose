@@ -5,15 +5,16 @@
 ``` shell
 |-- Main Function Process()
 `-- |-- For each sample 
-    `-- |-- save original bounding box provided by the author
+    `-- |-- Save original bounding box provided by the author
         |   |-- ### line 895
-    `-- |-- save 3d joints annotation in real-world coordinate 
+    `-- |-- Save 3d joints annotation in real-world coordinate 
         |   |-- ### line 927
 		
 		
 		
 |-- GetRidOfBackground()
-`-- |-- For each sample 
+`-- |-- Extend the rectangle to square 
+    |   |-- ### line 494 - 521
     `-- |-- save original bounding box provided by the author
         |   |-- ### line 895
     `-- |-- save 3d joints annotation in real-world coordinate 
