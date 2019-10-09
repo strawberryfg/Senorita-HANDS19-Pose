@@ -39,3 +39,12 @@ Now let's get started.
   YYYY is the model of last step. Ensure that the initial pose estimator does not dominate the loss, meaning that the MPJPE error of refined pose ought to be smaller than the initial estimate.
   
 Switch to [this page](https://github.com/strawberryfg/Senorita-HANDS19-Pose/tree/master/src/network_layers) for the code about rendering and refinement.
+
+## Test
+- ```M1```
+  ```
+  caffe test -model 
+  ```  
+- ```M2```
+- ```M3```
+- ```M4```
