@@ -81,3 +81,8 @@ Bone vector -> joint vector.
 ``` 
 Display MPJPE (mm).
 ```
+
+## JointAbsLoss
+``` 
+L1 loss on 2D pixel coordinates & depth predictions. Used in [Integral Pose Regression](https://github.com/JimmySuen/integral-human-pose/blob/master/pytorch_projects/common_pytorch/loss/integral.py).
+```
