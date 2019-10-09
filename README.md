@@ -32,3 +32,8 @@ Now let's get started.
   caffe train --solver=solver_aug_lfd_3dske.prototxt --snapshot=XXXX.solverstate --gpu 0
   ```
   XXXX stands for the solverstate which terminates the *w/ only integral loss* step.
+- Add the patch refinement module and jointly train the initial pose estimator and patch-based refinement module.
+  ```
+  caffe train --solver=solver_aug_lfd_patch.prototxt --weights=YYYY.caffemodel --gpu 0
+  ```
+  YYYY is the model of last step. Ensure that the initial pose estimator does not dominate the loss, meaning that the MPJPE error of refined pose ought to be smaller than the initial estimate.
