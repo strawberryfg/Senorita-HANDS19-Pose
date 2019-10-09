@@ -27,6 +27,7 @@ For PyTorch users, it's quite easy to transform weights across DL frameworks. (e
 * Widely applicable multiple input representations.
 * Easy-to-get add-on: a 3D skeleton volumes renderer.
 * Effective and replaceable refinement network.
+* Neat framework, lucid organization. No gossamer.
 
 # Data
 Please go to the [official webpage](https://sites.google.com/view/hands2019/challenge) and fill the form to participate. **Please do not ask me for the data. I am not authorized to release the data, neither do I have permission to redistribute it.**
