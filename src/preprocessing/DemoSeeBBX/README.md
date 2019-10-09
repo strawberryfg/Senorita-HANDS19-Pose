@@ -5,8 +5,8 @@
 ``` shell
 |-- Main Function Process()
 `-- |-- For each sample 
-    `-- |-- read & save original bounding box provided by the author (**line 895**)
-        |   |-- deep_human_model_layers.hpp
+    `-- |-- read & save original bounding box provided by the author
+        |   |-- ### line 895
         |   |   | ### This includes operations about 2d/3d heatmap /integral / augmentation / local <-> global transformation etc.
         |   |-- h36m.h
         |   |   | ### This includes definitions of joint / part / bone (h36m 32 joints / usable 16 joints / c2f 17 joints etc.)
