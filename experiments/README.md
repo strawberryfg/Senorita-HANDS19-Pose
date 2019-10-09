@@ -12,7 +12,7 @@ The work-flow is described below.
 
 * You obtain augmented ground truth of ```2D``` & ```3D``` & ```depth```, either in ```local``` coordinate space or ```global```.
 
-* You start to articulate the system input depending on which model you would like to use.
+* You start to ```articulate the system input``` depending on which model you would like to use.
 
 * You run the ```initial pose estimator```, which in this case is the [integral regression](https://github.com/strawberryfg/int-3dhuman-I1). As a result, predicted ```3D``` & ```2D```, either in ```local``` & ```global``` are computed. You observe the ```MPJPE``` error in ```mm```. 
 
@@ -30,3 +30,4 @@ The work-flow is described below.
   - This refined 3D pose is our ```final output```.
   - So how do we achieve the balance between ```initial pose estimator``` and ```patch-based refinement```? That's why I initially introduced the adaptive loss weight balancing layer.
   - Again, it's convenient to overlay the refined 2D, output the refined 3D for visualization purpose.
+  - Besides, the current proto supports showing joint error **MPJPE** in ```millimeters```. 
