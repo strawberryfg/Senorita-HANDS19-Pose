@@ -91,5 +91,5 @@ Reference: [Integral Pose Regression](https://github.com/JimmySuen/integral-huma
 
 ## OutputBlob
 ``` 
-Output one network blob to disk. (Essentially saving results)
+Export one network blob output to disk. (Essentially saving results)
 ```
