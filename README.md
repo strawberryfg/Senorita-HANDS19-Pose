@@ -16,6 +16,14 @@ The following steps are required to preprocess the data.
 1. Run ```${POSE_ROOT}/src/preprocessing/DemoSeeBBX/DemoSeeBBX.cpp``` to crop depth patch.
 2. Run ```${POSE_ROOT}/src/preprocessing/GenHands19H5/GenHands19H5.cpp``` to generate (annotation) HDF5 file for training / testing.
 
+# Trained weights
+| Method | Weight Model  |
+|:-:|:-:|
+| M1     | [M1](https://drive.google.com/file/d/1jH50yED6Jr6uAAlomvn5AGdaDaHGoLhD/view?usp=sharing) |
+| M2     | [M2](https://drive.google.com/file/d/1jH50yED6Jr6uAAlomvn5AGdaDaHGoLhD/view?usp=sharing) |
+| M3     | [M3](https://drive.google.com/file/d/1jH50yED6Jr6uAAlomvn5AGdaDaHGoLhD/view?usp=sharing) |
+| M4     | [M4](https://drive.google.com/file/d/1jH50yED6Jr6uAAlomvn5AGdaDaHGoLhD/view?usp=sharing) |
+
 # Work it over
 ## Train
 **[NOTE]** CHANGE THE TRAINING SCHEDULE AND SEE IF THE RESULT GETS IMPROVED. INCLUDING BUT NOT LIMITED TO BASE LEANRING RATE, STEPS TO SLOWER THE LEARNING RATE, LOSS WEIGHT RATIOS.
@@ -42,6 +50,7 @@ Switch to [this page](https://github.com/strawberryfg/Senorita-HANDS19-Pose/tree
 
 ## Test
 - ```M1```
+  Run
   ```
   caffe test -model 
   ```  
