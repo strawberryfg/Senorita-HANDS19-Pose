@@ -20,5 +20,5 @@ The work-flow is described below.
 
 * ```3D skeleton volumes``` renderer takes predicted 2D & depth as input, and synthesize a volume. Which is then compared against ground truth. This *pseudo analysis by synthesis* (**NO, IT'S NOT**) is another explicit loss function merely to accelerate and enhance the training.
 
-* If you happen to be at the stage where patch-based refinement is working.
-  - Simply search "GenBonePatch" and you are scurrying to the refinement part. 
+* If you happen to be at the stage where ```patch-based refinement``` is working.
+  - Simply search ```"GenBonePatch"``` and you are scurrying to the ```refinement``` part. 
