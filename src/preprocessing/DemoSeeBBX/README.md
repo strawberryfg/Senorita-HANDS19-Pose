@@ -12,16 +12,16 @@
     `-- |-- Crop interested depth image patch 
     `-- |-- |-- Rough background subtraction
         |   |   |-- ### line 955 Deploy "GetRidOfBackground". Remove palpable pixels which are outliers.
-    `-- |-- Rough CoM (center of mass; 2.5D) calculation  
-        |   |-- ### line 965 Deploy "calcBoxCenter()" w/ option = 0
-    `-- |-- Fine bounding box reset w/ CoM 
-        |   |-- ### line 981 - 997 new box size: 500.0 / avgZ * 210.0 (smaller avgZ = closer hand = larger crop size)
-    `-- |-- Fine background subtraction
-        |   |-- ### line 1002 Deploy "GetRidOfBackground". This time abandons pixel with depth outside the reasonable depth range [avgZ - 100, avgZ + 100]
-    `-- |-- Fine CoM recalculation
-        |   |-- ### line 1007 Deploy "calcBoxCenter()" w/ option = 1; Direct averaging 2.5D 
-    `-- |-- Resize to a 256x256 patch of depth values normalized to [-1, 1]
-        |   |-- ### line 1015 - 1026
+    `-- |-- |-- Rough CoM (center of mass; 2.5D) calculation  
+        |   |   |-- ### line 965 Deploy "calcBoxCenter()" w/ option = 0
+    `-- |-- |-- Fine bounding box reset w/ CoM 
+        |   |   |-- ### line 981 - 997 new box size: 500.0 / avgZ * 210.0 (smaller avgZ = closer hand = larger crop size)
+    `-- |-- |-- Fine background subtraction
+        |   |   |-- ### line 1002 Deploy "GetRidOfBackground". This time abandons pixel with depth outside the reasonable depth range [avgZ - 100, avgZ + 100]
+    `-- |-- |-- Fine CoM recalculation
+        |   |   |-- ### line 1007 Deploy "calcBoxCenter()" w/ option = 1; Direct averaging 2.5D 
+    `-- |-- |-- Resize to a 256x256 patch of depth values normalized to [-1, 1]
+        |   |   |-- ### line 1015 - 1026
 	
 	 
 	
