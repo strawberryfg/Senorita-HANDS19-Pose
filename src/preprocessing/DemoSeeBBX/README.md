@@ -45,6 +45,12 @@
 |-- calcBoxCenter()
 `-- |-- Compute the average UVD (2.5D coordinate mean values) of the cropped depth image
     |   |-- ### line 137 - 168 mean(u, v, d); pixel coordinate + depth value 
+`-- |-- If option == 0
+        |   |-- Take the 2.5D coordinate of center point (which is approximately middle MCP)
+        |   |   |-- ### line 175
+        |   |   |   |   |-- If it equals 0.0 BFS to find nearest non-zero pixel starting from the center pixel 
+		
+		
 
 
        
