@@ -63,5 +63,21 @@ Overlay 2D joints on the depth image.
 
 ## DeepHandModelGen3DSkeletonMapPerChannel
 ``` 
-Render 3D skeleton volume based on 2D & depth.
+Render 3D skeleton volumes based on 2D & depth.
+```
+
+## DeepHandModelGenBonePatchAll
+``` 
+Crop the depth patch concerning each bone.
+```
+
+
+## DeepHandModelBone2Joint
+``` 
+Bone vector -> joint vector.
+```
+
+## Joint3DSquareRootLoss
+``` 
+Display MPJPE (mm).
 ```
