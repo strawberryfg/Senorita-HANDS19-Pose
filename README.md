@@ -9,3 +9,5 @@ This repo is our implementation for the [HANDS19 Challenge Task 1 - Depth-Based 
 
 ## Data
 Please go to the [official webpage](https://sites.google.com/view/hands2019/challenge) and fill the form to participate. **Please do not ask me for the data. I am not authorized to release the data, neither do I have permission to redistribute it.**
+
+You may have to change the directory path accordingly. Easy stuff.
