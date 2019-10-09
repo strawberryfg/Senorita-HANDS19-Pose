@@ -25,7 +25,7 @@ For PyTorch users, it's quite easy to transform weights across DL frameworks. (e
 * Easy code. EASY MONEY (**NO NO NO**)
 * Data processing code for HANDS19 Dataset.
 * Widely applicable multiple input representations.
-* Easy-to-get add-on: a 3D skeleton volumes renderer.
+* Easy-to-get adds-on: a 3D skeleton volumes renderer.
 * Effective and replaceable refinement network.
 * Neat framework. Lucid organization. No gossamer.
 * Mediocre result. Hmmm.
