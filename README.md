@@ -18,7 +18,7 @@ For PyTorch users, it's quite easy to transform weights across DL frameworks. (e
 # Result
 | EXTRAP. | INTERP. | SHAPE. | ARTIC. | VIEWP. |
 |:-:|:-:|:-:|:-:|:-:|
-| 19.63 | 8.42 | 14.22 | 7.50 | 14.16 |
+| 19.63 | 8.42 | 14.21 | 7.50 | 14.16 |
 
 # Features
 
