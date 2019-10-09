@@ -1,5 +1,8 @@
 # Data Preprocessing
 
+
+**Note that you may have to change the directory path accordingly. Easy stuff.**
+
 ## Overall Pipeline
 
 ``` shell
@@ -22,11 +25,8 @@
         |   |   |-- ### line 1007 Deploy "calcBoxCenter()" w/ option = 1; Direct averaging 2.5D 
         |   |-- Resize to a 256x256 patch of depth values normalized to [-1, 1]
         |   |   |-- ### line 1015 - 1026
-	
-	 
-	
-
-       
+    `-- |-- Finally save the cropped image patch to disk
+        |   |   |-- ### line 1096 - 1098 The path "XXXXX_images_crop" is often used in prototxt configuration	    
 ```
 		
 ## Functions
@@ -57,25 +57,3 @@
 `-- |-- Else: 2.5D -> 3D save to avgX, avgY, avgZ
         |   |-- ### line 171
 ``` 
-		
-		
-		
-		
-		
-		
-		
-		
-
-``` shell	
-`-- |-- src
-    `-- |-- caffe
-        |   |-- layers
-        |   |   |-- DeepHumanModel
-        |   |   |   |-- deep_human_model_argmax_2d_hm_layer.cpp 
-        |   |   |   |-- ### This takes argmax operation on 2d heatmap 
-``` 
-		
-		
-
-
-       
