@@ -27,4 +27,8 @@ Now let's get started.
   ```
   caffe train --solver=solver_aug_lfd.prototxt --weights=../mks.caffemodel --gpu 0
   ```
-- Train w/ only integral loss 
+- Add 3d skeleton volume rendering loss. (Compare with that generated from ground truth 3D pose)
+  ```
+  caffe train --solver=solver_aug_lfd_3dske.prototxt --snapshot=XXXX.solverstate --gpu 0
+  ```
+  XXXX stands for the solverstate which terminates the *w/ only integral loss* step.
