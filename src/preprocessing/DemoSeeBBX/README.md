@@ -49,7 +49,7 @@
         |   |-- Take the depth value of center point (which is approximately middle MCP)
         |   |   |-- ### line 175
         |   |   |   |   |-- If it equals 0.0 BFS to find nearest non-zero pixel starting from the center pixel 
-        |   |   |   |   |   |-- ### If cannot find forcibly set the depth to 500.0 
+        |   |   |   |   |   |-- ### line 178 - 203 If cannot find forcibly set the depth to 500.0 
 		
 		
 
