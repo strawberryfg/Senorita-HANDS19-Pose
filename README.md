@@ -44,7 +44,7 @@ The following steps are required to preprocess the data.
 | M3     | [M3](https://drive.google.com/file/d/1ddOyxxqLffyjzeYkm1c9heu4wl_zAEh4/view?usp=sharing) |
 | M4     | [M4](https://drive.google.com/file/d/1A9i4bIH53C90EXHIiV5iTOIZdT1VbLoo/view?usp=sharing) |
 
-```mks.caffemodel``` is pretrained weights on Human3.6M using integral regression (I*), including a ResNet50 backbone and a simple deconvolution head, which is released [here](https://drive.google.com/file/d/1NeOA3HWPHftAF9GGFXsXetH3gcHWt_rH/view?usp=sharing).
+```mks.caffemodel``` is the pretrained weights on Human3.6M using integral regression (I*), including a ResNet50 backbone and a simple deconvolution head, which is released [here](https://drive.google.com/file/d/1NeOA3HWPHftAF9GGFXsXetH3gcHWt_rH/view?usp=sharing).
 
 # Work it over
 ## Train
@@ -107,3 +107,8 @@ Switch to [this page](https://github.com/strawberryfg/Senorita-HANDS19-Pose/tree
   ```
 
   
+
+# Concluding remarks
+No implied shape model. No synthetic images.
+
+Well, the result is mediocre at any rate.
