@@ -9,3 +9,12 @@ You may find these three repos [c2f](https://github.com/strawberryfg/c2f-3dhm-hu
 For the time being I am using this [framework](https://github.com/happynear/caffe-windows) by happynear, as you see I have only access to a Windows laptop. But it should work fine under Ubuntu too.
 
 To configure my personalized layers, you will have to add **hpp** files and **new cpp** files. See the above repos or [this page](https://github.com/BVLC/caffe/wiki/Development) to get an idea.
+
+# Functionalities
+
+----
+
+## DeepHandModelGetHands19ChaDepth
+``` 
+
+``` 
