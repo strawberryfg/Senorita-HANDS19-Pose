@@ -2,7 +2,7 @@
 
 ## Pipeline
 
-|-- Main Function "Process()"
+|-- Main Function Process()
 `-- |-- include
     `-- |-- caffe
         |   |-- deep_human_model_layers.hpp
