@@ -26,15 +26,15 @@ Projecting real-world 3D coordinates to 2D. (on raw depth image)
 
 ## DeepHandModelReadDepthNoBBXWithAVGZAug
 ``` 
-Return the random augmented depth image and augmented 3D location in the fixed-size cube.
+Return the random augmented depth image and augmented 3D locations in the fixed-size cube.
 ``` 
 
 ## DeepHandModelCubiodIntoGlobalV2
 ``` 
-Return the augmented 3D location in the real-world coordinate.
+Return the augmented 3D locations in the real-world coordinate.
 ``` 
 
 ## DeepHandModelProjectionGlobal2Local
 ``` 
-Return the normalized 2D coordinate in the cropped bounding box. (in [0, 1])
+Return the normalized 2D coordinates in the cropped bounding box. (in [0, 1])
 ``` 
