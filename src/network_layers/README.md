@@ -16,5 +16,5 @@ To configure my personalized layers, you will have to add **hpp** files and **ne
 
 ## DeepHandModelGetHands19ChaDepth
 ``` 
-
+Output the **revised** bounding box of depth patch, 3D cube bounding box, and 2D image center coordinate (pixel coordinate of center of mass).
 ``` 
