@@ -1,4 +1,8 @@
 # Senorita-HANDS19-Pose
+<p align="center">
+<img src="https://drive.google.com/file/d/1Vb75WZ4OBQXvRSVRQgcEZ0Y_yJsQYqaI/view?usp=sharing" width="400" height="250"> >
+</p>
+
 
 # Introduction
 
