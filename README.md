@@ -75,7 +75,7 @@ Switch to [this page](https://github.com/strawberryfg/Senorita-HANDS19-Pose/tree
 
 ## Test
 
-```cd ${POSE_ROOT}/experiments/test``` Download the models and place to corresponding folders. Enter either of the four folders.
+```cd ${POSE_ROOT}/experiments/test``` Download the models and place to corresponding folders. Enter into either of the four folders.
 
 
 - ```M1```
@@ -112,4 +112,4 @@ Switch to [this page](https://github.com/strawberryfg/Senorita-HANDS19-Pose/tree
   
 
 # Concluding remarks
-No implied shape model is enforced at any rate. No synthetic images are used either anyway.
+No shape model is injected at any rate. No synthetic images are used either anyway.
