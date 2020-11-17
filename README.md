@@ -1,6 +1,6 @@
 # Senorita-HANDS19-Pose
 <p align="center">
-<img src="http://www.qingfuwan.com/uploads/1/1/5/6/115646345/pipeline.png" > 
+<img src="pipeline.png" > 
 </p>
 
 
